@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>OverBerg Go</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#06121C;}
+
+:root{
+  /* PRIMARY = Kelp Green, SEA = Sea Blue, SAND = Sand White */
+  --primary:#1E9E5A;  /* Light green — new primary */
+  --primary-d:#167042;
+  --primary-l:#B3EACF;
+  --sea:#0E9EC2;  /* Sea blue — support */
+  --sea-d:#0A7A99;
+  --sea-l:#B8E8F5;
+  --sand:#F2EFE6;  /* Sea white — support */
+  --sand-d:#D9D3C0;
+  --sun:#F5A623;--coral:#E8503A;
+  --dark:#0D1F2D;--dark2:#102332;--dark3:#162C3A;--dark4:#1E3547;
+  --surf:#243C50;
+  --t1:#FFFFFF;--t2:rgba(255,255,255,0.62);--t3:rgba(255,255,255,0.35);
+  --bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.15);
+  --h:'Plus Jakarta Sans',sans-serif;--b:'DM Sans',sans-serif;
+  --r:18px;
+}
+
+body{display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 30% 20%,rgba(30,158,90,0.12) 0%,transparent 50%),
+             radial-gradient(ellipse at 80% 80%,rgba(14,158,194,0.07) 0%,transparent 45%),
+             #06121C;}
+
+.device{position:relative;width:390px;height:844px;background:var(--dark);border-radius:50px;
+  box-shadow:0 0 0 1.5px rgba(255,255,255,0.1),0 50px 100px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.07);
+  overflow:hidden;flex-shrink:0;}
+.device::before{content:'';position:absolute;top:0;left:0;right:0;height:200px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(30,158,90,0.12) 0%,transparent 70%);
+  pointer-events:none;z-index:0;}
+
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:36px;
+  background:var(--dark);border-radius:0 0 20px 20px;z-index:100;
+  border:1.5px solid rgba(255,255,255,0.06);border-top:none;}
+
+/* ── STATUS BAR ── */
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 4px;
+  font-size:12px;font-weight:700;font-family:var(--h);position:relative;z-index:10;}
+.sbar-r{display:flex;align-items:center;gap:6px;}
+.batt{display:inline-flex;align-items:center;border:1.5px solid rgba(255,255,255,0.35);border-radius:3px;padding:1px 2px;gap:2px;}
+.batt-fill{width:14px;height:7px;background:var(--primary);border-radius:1px;}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;
+  padding-top:44px;will-change:transform;
+  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.25s;
+  transform:translateX(100%);opacity:0;pointer-events:none;}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{transform:translateX(0);opacity:1;pointer-events:all;}
+.screen.prev{transform:translateX(-40px);opacity:0;}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:absolute;bottom:0;left:0;right:0;background:rgba(13,31,45,0.96);
+  backdrop-filter:blur(24px);border-top:1px solid var(--bd);display:flex;
+  justify-content:space-around;padding:12px 4px 28px;z-index:50;}
+.bn{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;cursor:pointer;position:relative;transition:all .2s;}
+.bn.on{color:var(--primary);}
+.bn:not(.on){color:var(--t3);}
+.bn-bar{position:absolute;top:-13px;left:50%;transform:translateX(-50%);width:28px;height:3px;background:var(--primary);border-radius:2px;}
+.bn-ic{font-size:20px;line-height:1;}
+.bn-lb{font-family:var(--h);font-size:10px;font-weight:600;}
+.bn-dot{position:absolute;top:0;right:calc(50% - 20px);background:var(--coral);border-radius:999px;width:8px;height:8px;border:2px solid var(--dark);}
+
+/* ── COMMON ── */
+.px{padding-left:18px;padding-right:18px;}
+.card{background:var(--dark2);border:1px solid var(--bd);border-radius:var(--r);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;border-radius:999px;
+  font-size:12px;font-family:var(--h);font-weight:600;white-space:nowrap;cursor:pointer;
+  transition:all .15s;border:1.5px solid var(--bd2);color:var(--t2);background:var(--dark3);}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.sec{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-t{font-family:var(--h);font-weight:800;font-size:16px;color:#fff;letter-spacing:-0.02em;}
+.sec-a{font-family:var(--h);font-weight:600;font-size:12px;color:var(--primary);}
+.btn-primary{width:100%;background:var(--primary);color:#fff;font-family:var(--h);font-weight:800;
+  font-size:16px;border:none;border-radius:16px;padding:17px;cursor:pointer;transition:all .2s;letter-spacing:-0.01em;}
+.btn-primary:active{background:var(--primary-d);transform:scale(0.98);}
+.page-hd{display:flex;align-items:center;gap:12px;padding:14px 18px 10px;}
+.back{width:40px;height:40px;border-radius:14px;background:var(--dark3);border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;}
+.dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.22);flex-shrink:0;}
+
+/* ── HOME ── */
+.loc-row{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 0;position:relative;z-index:2;}
+.loc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t3);margin-bottom:2px;}
+.loc-val{display:flex;align-items:center;gap:5px;font-family:var(--h);font-weight:700;font-size:14.5px;}
+.top-actions{display:flex;gap:8px;}
+.icon-btn{width:40px;height:40px;border-radius:14px;background:var(--dark3);border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;position:relative;}
+.badge-dot{position:absolute;top:9px;right:9px;width:7px;height:7px;background:var(--coral);border-radius:50%;border:1.5px solid var(--dark);}
+.avatar{width:40px;height:40px;border-radius:14px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:var(--h);font-weight:900;font-size:16px;cursor:pointer;}
+.greeting{font-family:var(--h);font-weight:900;font-size:24px;letter-spacing:-0.03em;line-height:1.15;margin-bottom:14px;}
+.searchbar{display:flex;align-items:center;gap:10px;background:var(--dark3);border:1.5px solid var(--bd);border-radius:14px;padding:13px 15px;cursor:pointer;}
+.searchbar span{font-size:14px;color:var(--t3);font-family:var(--b);}
+.weather-strip{margin:14px 18px;padding:12px 15px;background:var(--dark3);border:1px solid rgba(30,158,90,0.2);border-radius:14px;display:flex;align-items:center;gap:11px;}
+.w-live{margin-left:auto;background:rgba(30,158,90,0.1);color:var(--primary);font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;font-family:var(--h);border:1px solid rgba(30,158,90,0.25);}
+
+/* service grid */
+.svc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.svc{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.svc-wrap{width:58px;height:58px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:24px;border:1.5px solid transparent;transition:transform .15s;}
+.svc:active .svc-wrap{transform:scale(0.93);}
+.svc-lb{font-family:var(--h);font-weight:600;font-size:10px;color:var(--t2);text-align:center;line-height:1.2;}
+
+/* promo cards */
+.promo-row{display:flex;gap:12px;overflow-x:auto;padding:0 18px 4px;scrollbar-width:none;}
+.promo-row::-webkit-scrollbar{display:none;}
+.promo{flex-shrink:0;width:200px;border-radius:18px;padding:16px;border:1px solid;cursor:pointer;transition:transform .2s;}
+.promo:active{transform:scale(0.97);}
+.p-code{font-size:10px;font-weight:900;padding:3px 9px;border-radius:999px;font-family:var(--h);letter-spacing:.04em;}
+.p-title{font-family:var(--h);font-weight:700;font-size:13px;color:#fff;margin:10px 0 3px;}
+.p-desc{font-size:11px;color:var(--t2);}
+
+/* ── FOOD SCREEN ── */
+.r-card{background:var(--dark2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s;margin-bottom:12px;}
+.r-card:active{transform:scale(0.99);border-color:var(--bd2);}
+.r-hero{height:120px;position:relative;overflow:hidden;}
+.r-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:56px;}
+.r-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,32,0.88) 0%,rgba(10,22,32,0.1) 55%,transparent 100%);}
+.r-pill{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.13);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:3px;}
+.r-tag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.9);}
+.r-info{padding:12px 14px 14px;}
+.r-name{font-family:var(--h);font-weight:700;font-size:14px;color:#fff;margin-bottom:5px;}
+.r-sub{font-size:11px;color:var(--t2);margin-bottom:6px;line-height:1.4;}
+.r-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.closed-mask{position:absolute;inset:0;background:rgba(0,0,0,0.62);display:flex;align-items:center;justify-content:center;z-index:5;}
+.closed-chip{background:rgba(0,0,0,0.8);color:rgba(255,255,255,0.7);font-weight:700;font-size:11px;padding:5px 15px;border-radius:999px;border:1px solid rgba(255,255,255,0.15);}
+
+/* ── MENU SCREEN ── */
+.menu-hero{height:200px;position:relative;overflow:hidden;}
+.menu-hero-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:80px;}
+.menu-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--dark) 0%,rgba(13,31,45,0.3) 60%,transparent 100%);}
+.menu-info{position:absolute;bottom:14px;left:18px;right:18px;}
+.menu-name{font-family:var(--h);font-weight:900;font-size:22px;letter-spacing:-0.03em;color:#fff;}
+.menu-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);margin-top:4px;}
+.cat-tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--bd);scrollbar-width:none;}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tab{padding:12px 18px;font-family:var(--h);font-weight:700;font-size:13px;color:var(--t3);cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;flex-shrink:0;}
+.cat-tab.on{color:var(--primary);}
+.cat-tab.on::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--primary);border-radius:2px;}
+.menu-item{display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid var(--bd);cursor:pointer;}
+.mi-img{width:76px;height:76px;border-radius:14px;background:var(--dark3);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.mi-info{flex:1;min-width:0;}
+.mi-name{font-family:var(--h);font-weight:700;font-size:14px;color:#fff;margin-bottom:3px;}
+.mi-desc{font-size:11.5px;color:var(--t2);line-height:1.4;margin-bottom:8px;}
+.mi-price{font-family:var(--h);font-weight:800;font-size:15px;color:var(--primary);}
+.add-btn{width:34px;height:34px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;border:none;transition:all .15s;}
+.add-btn:active{background:var(--primary-d);transform:scale(0.93);}
+.cart-bar{position:sticky;bottom:80px;margin:0 18px;background:var(--primary);border-radius:16px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:0 8px 24px rgba(30,158,90,0.35);}
+
+/* ── RIDE SCREEN ── */
+.map-zone{height:260px;background:linear-gradient(160deg,#0E2A3A 0%,#0D1F2D 100%);position:relative;overflow:hidden;}
+.map-grid{position:absolute;inset:0;opacity:0.1;}
+.grid-h{position:absolute;left:0;right:0;height:1.5px;background:rgba(30,158,90,0.7);}
+.grid-v{position:absolute;top:0;bottom:0;width:1.5px;background:rgba(30,158,90,0.5);}
+.map-pin{position:absolute;display:flex;flex-direction:column;align-items:center;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px rgba(255,255,255,0.3);}
+.pin-lbl{font-family:var(--h);font-size:9px;font-weight:700;background:var(--dark);border:1px solid var(--bd2);padding:2px 8px;border-radius:6px;margin-top:4px;white-space:nowrap;color:#fff;}
+.car-marker{position:absolute;font-size:24px;filter:drop-shadow(0 2px 8px rgba(30,158,90,0.5));}
+@keyframes carMove{0%{left:45%;top:55%;}50%{left:52%;top:48%;}100%{left:45%;top:55%;}}
+.car-marker{animation:carMove 6s ease-in-out infinite;}
+.route-line{position:absolute;top:50%;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--primary),transparent);opacity:0.4;}
+.addr-inputs{padding:14px 18px;display:flex;flex-direction:column;gap:0;}
+.addr-field{background:var(--dark3);border:1.5px solid var(--bd);border-radius:13px;padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s;}
+.addr-field:focus-within{border-color:rgba(30,158,90,0.5);}
+.addr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.addr-text{font-size:13.5px;color:var(--t2);font-family:var(--b);}
+.addr-text.filled{color:#fff;font-weight:500;}
+.conn-line{width:1.5px;height:20px;background:var(--bd2);margin-left:22px;}
+.places-row{display:flex;gap:8px;overflow-x:auto;padding:0 18px 14px;scrollbar-width:none;}
+.places-row::-webkit-scrollbar{display:none;}
+.place-chip{display:flex;align-items:center;gap:7px;padding:9px 14px;background:var(--dark3);border:1px solid var(--bd);border-radius:999px;cursor:pointer;flex-shrink:0;transition:all .2s;}
+.place-chip:active{background:var(--dark4);}
+.place-chip span{font-family:var(--h);font-weight:600;font-size:12px;color:var(--t2);}
+.ride-types{display:flex;gap:10px;overflow-x:auto;padding:0 18px 14px;scrollbar-width:none;}
+.ride-types::-webkit-scrollbar{display:none;}
+.ride-card{flex-shrink:0;border-radius:16px;padding:13px 16px;border:2px solid;min-width:120px;cursor:pointer;transition:all .2s;}
+.ride-card.sel{border-color:var(--primary);background:rgba(30,158,90,0.1);}
+.ride-card:not(.sel){border-color:var(--bd);background:var(--dark2);}
+.ride-n{font-family:var(--h);font-weight:700;font-size:12px;color:#fff;}
+.ride-p{font-family:var(--h);font-weight:900;font-size:17px;color:var(--primary);}
+.ride-eta{font-size:10.5px;color:var(--t2);margin-top:2px;}
+.driver-card{background:var(--dark2);border:1px solid var(--bd);border-radius:18px;padding:15px;display:flex;align-items:center;gap:13px;margin:0 18px 14px;}
+.d-av{width:52px;height:52px;border-radius:16px;background:var(--primary-d);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.d-name{font-family:var(--h);font-weight:700;font-size:14px;color:#fff;}
+.d-stars{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--sun);}
+.d-plate{font-family:var(--h);font-weight:800;font-size:11px;background:var(--dark3);border:1px solid var(--bd2);padding:3px 9px;border-radius:7px;color:#fff;letter-spacing:.05em;margin-top:4px;display:inline-block;}
+.d-actions{margin-left:auto;display:flex;gap:8px;}
+.d-act{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+
+/* ── PnP ── */
+.pnp-hdr{background:linear-gradient(135deg,#cc1f1a 0%,#8a0e0b 100%);padding:18px;position:relative;overflow:hidden;}
+.pnp-hdr::before{content:'';position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,0.06);border-radius:50%;}
+.pnp-logo-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.pnp-logo{width:50px;height:50px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:var(--h);font-weight:900;font-size:16px;color:#cc1f1a;flex-shrink:0;}
+.pnp-badge{font-size:10px;font-weight:700;background:rgba(255,255,255,0.18);color:#fff;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,0.3);}
+.pnp-smart{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);border-radius:12px;padding:10px 14px;border:1px solid rgba(255,255,255,0.1);}
+.smart-bar{flex:1;height:6px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;}
+.smart-fill{height:100%;width:68%;background:linear-gradient(90deg,#FFD700,#FFA500);border-radius:3px;}
+.pnp-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 18px;}
+.pnp-cat{background:var(--dark2);border:1px solid var(--bd);border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .2s;}
+.pnp-cat:active{background:var(--dark3);border-color:var(--bd2);}
+.pnp-cat-ic{font-size:24px;}
+.pnp-cat-lb{font-family:var(--h);font-weight:600;font-size:9.5px;color:var(--t2);text-align:center;}
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 100px;}
+.prod{background:var(--dark2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.prod:active{border-color:var(--bd2);transform:translateY(-1px);}
+.prod-img{height:100px;background:var(--dark3);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;}
+.sale-badge{position:absolute;top:6px;left:6px;background:var(--coral);color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:6px;font-family:var(--h);}
+.prod-info{padding:10px;}
+.prod-name{font-family:var(--h);font-weight:600;font-size:12px;color:#fff;margin-bottom:6px;line-height:1.3;}
+.prod-row{display:flex;align-items:center;justify-content:space-between;}
+.prod-price{font-family:var(--h);font-weight:800;font-size:14px;color:var(--primary);}
+.prod-add{width:30px;height:30px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;cursor:pointer;border:none;transition:all .15s;}
+.prod-add:active{background:var(--primary-d);transform:scale(0.93);}
+
+/* ── ORDERS ── */
+.order-card{background:var(--dark2);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;}
+.ord-status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-family:var(--h);font-weight:700;font-size:11px;margin-bottom:12px;}
+.ord-status.live{background:rgba(30,158,90,0.15);color:var(--primary);border:1px solid rgba(30,158,90,0.3);}
+.ord-status.done{background:rgba(255,255,255,0.06);color:var(--t2);border:1px solid var(--bd);}
+.ord-rest{font-family:var(--h);font-weight:700;font-size:15px;color:#fff;margin-bottom:3px;}
+.ord-items{font-size:12px;color:var(--t2);margin-bottom:10px;}
+.ord-bottom{display:flex;align-items:center;justify-content:space-between;}
+.ord-total{font-family:var(--h);font-weight:800;font-size:15px;color:#fff;}
+.ord-time{font-size:11px;color:var(--t3);}
+.track-bar{background:var(--dark3);border-radius:12px;padding:14px;border:1px solid rgba(30,158,90,0.2);}
+.track-steps{display:flex;align-items:center;gap:0;}
+.t-step{display:flex;flex-direction:column;align-items:center;flex:1;}
+.t-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .3s;}
+.t-circle.done{background:var(--primary);}
+.t-circle.active{background:var(--sea);box-shadow:0 0 12px rgba(14,158,194,0.5);}
+.t-circle.pending{background:var(--dark4);border:1.5px solid var(--bd2);}
+.t-line{flex:1;height:2px;background:var(--bd2);margin:0 -2px;position:relative;top:-8px;}
+.t-line.done{background:var(--primary);}
+.t-lb{font-family:var(--h);font-size:9.5px;font-weight:600;margin-top:6px;text-align:center;color:var(--t2);}
+.t-lb.active{color:var(--sea);}
+
+/* ── PROFILE ── */
+.profile-hero{background:linear-gradient(180deg,rgba(30,158,90,0.15) 0%,transparent 100%);padding:24px 18px 20px;text-align:center;}
+.p-av{width:80px;height:80px;border-radius:26px;background:var(--primary);display:flex;align-items:center;justify-content:center;font-family:var(--h);font-weight:900;font-size:30px;margin:0 auto 14px;border:3px solid rgba(30,158,90,0.3);}
+.p-name{font-family:var(--h);font-weight:800;font-size:22px;color:#fff;margin-bottom:4px;}
+.p-location{font-size:13px;color:var(--t2);}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 18px 20px;}
+.stat-card{background:var(--dark2);border:1px solid var(--bd);border-radius:14px;padding:14px 10px;text-align:center;}
+.stat-val{font-family:var(--h);font-weight:900;font-size:22px;color:#fff;letter-spacing:-0.02em;}
+.stat-lb{font-size:11px;color:var(--t2);margin-top:3px;}
+.menu-list{padding:0 18px 100px;}
+.menu-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--bd);cursor:pointer;}
+.menu-ic{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.menu-row-txt{flex:1;}
+.menu-row-title{font-family:var(--h);font-weight:600;font-size:14px;color:#fff;}
+.menu-row-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.menu-arrow{color:var(--t3);font-size:16px;}
+
+/* ── EXPERIENCES SCREEN ── */
+.exp-card{background:var(--dark2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;margin-bottom:12px;transition:transform .2s,border-color .2s;}
+.exp-card:active{transform:scale(0.99);border-color:var(--bd2);}
+.exp-hero{height:110px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;}
+.exp-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.13);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;color:#fff;}
+.exp-info{padding:12px 14px 14px;}
+.exp-name{font-family:var(--h);font-weight:700;font-size:14px;color:#fff;margin-bottom:4px;}
+.exp-desc{font-size:11px;color:var(--t2);margin-bottom:8px;line-height:1.4;}
+.exp-meta{display:flex;align-items:center;gap:10px;}
+.exp-price{font-family:var(--h);font-weight:800;font-size:14px;color:var(--primary);}
+.exp-book-btn{margin-left:auto;background:var(--primary);color:#fff;font-family:var(--h);font-weight:700;font-size:11px;border:none;border-radius:999px;padding:6px 14px;cursor:pointer;transition:all .15s;}
+.exp-book-btn:active{background:var(--primary-d);transform:scale(0.96);}
+
+/* ── SERVICES/STAYS SCREEN ── */
+.stay-card{background:var(--dark2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;margin-bottom:12px;transition:transform .2s;}
+.stay-card:active{transform:scale(0.99);}
+.stay-hero{height:130px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;}
+.stay-badge-top{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.13);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;color:#fff;}
+.stay-badge-right{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.13);border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;color:#fff;}
+.stay-info{padding:12px 14px 14px;}
+.stay-name{font-family:var(--h);font-weight:700;font-size:14px;color:#fff;margin-bottom:4px;}
+.stay-desc{font-size:11px;color:var(--t2);margin-bottom:8px;line-height:1.4;}
+.stay-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2);}
+.stay-price{font-family:var(--h);font-weight:800;font-size:14px;color:var(--primary);}
+
+/* ── DRIVER APP ── */
+.driver-app-hdr{background:linear-gradient(135deg,rgba(30,158,90,0.2),rgba(14,158,194,0.1));padding:20px 18px 16px;border-bottom:1px solid var(--bd);}
+.online-toggle{width:64px;height:34px;background:var(--dark4);border-radius:999px;position:relative;cursor:pointer;transition:background .3s;border:2px solid var(--bd2);}
+.online-toggle.on{background:var(--primary);}
+.toggle-knob{width:26px;height:26px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .3s;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+.online-toggle.on .toggle-knob{left:34px;}
+.earnings-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:14px 18px;}
+.earn-card{background:var(--dark2);border:1px solid var(--bd);border-radius:14px;padding:12px 10px;text-align:center;}
+.earn-val{font-family:var(--h);font-weight:900;font-size:19px;color:#fff;letter-spacing:-0.02em;}
+.earn-lb{font-size:10px;color:var(--t2);margin-top:2px;}
+.trip-req{background:var(--dark2);border:1.5px solid rgba(30,158,90,0.4);border-radius:18px;padding:16px;margin:0 18px 14px;}
+.req-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.req-type{font-family:var(--h);font-weight:800;font-size:16px;color:#fff;}
+.req-price{font-family:var(--h);font-weight:900;font-size:20px;color:var(--primary);}
+.req-route{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.req-point{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);}
+.req-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.req-actions{display:flex;gap:10px;}
+.btn-decline{flex:1;background:transparent;border:1.5px solid var(--bd2);color:var(--t2);font-family:var(--h);font-weight:700;font-size:14px;border-radius:14px;padding:14px;cursor:pointer;}
+.btn-accept{flex:2;background:var(--primary);color:#fff;font-family:var(--h);font-weight:800;font-size:15px;border:none;border-radius:14px;padding:14px;cursor:pointer;}
+.drv-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 14px;}
+.drv-stat{background:var(--dark2);border:1px solid var(--bd);border-radius:14px;padding:13px;}
+.drv-stat-title{font-size:11px;color:var(--t2);margin-bottom:6px;}
+.drv-stat-val{font-family:var(--h);font-weight:800;font-size:18px;color:#fff;}
+
+/* ── RESTAURANT APP ── */
+.rest-app-hdr{background:linear-gradient(135deg,rgba(14,158,194,0.15),rgba(30,158,90,0.08));padding:16px 18px;border-bottom:1px solid var(--bd);}
+.new-order-card{background:var(--dark2);border:1.5px solid rgba(30,158,90,0.4);border-radius:18px;padding:16px;margin:0 18px 12px;animation:orderPulse 2s ease-in-out infinite;}
+@keyframes orderPulse{0%,100%{border-color:rgba(30,158,90,0.4);}50%{border-color:rgba(30,158,90,0.8);box-shadow:0 0 20px rgba(30,158,90,0.15);}}
+.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.order-num{font-family:var(--h);font-weight:900;font-size:18px;color:#fff;}
+.order-time-badge{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:var(--sun);font-family:var(--h);font-weight:700;font-size:11px;padding:4px 10px;border-radius:999px;}
+.order-items-list{margin-bottom:12px;}
+.order-item-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bd);}
+.order-item-row:last-child{border-bottom:none;}
+.oi-qty{width:24px;height:24px;background:var(--primary);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--h);font-weight:800;font-size:12px;color:#fff;flex-shrink:0;}
+.oi-name{font-family:var(--h);font-weight:600;font-size:13px;color:#fff;flex:1;}
+.oi-price{font-family:var(--h);font-weight:700;font-size:13px;color:var(--primary);}
+.order-actions{display:flex;gap:8px;}
+.btn-ready{flex:1;background:var(--primary);color:#fff;font-family:var(--h);font-weight:800;font-size:14px;border:none;border-radius:12px;padding:12px;cursor:pointer;transition:all .2s;}
+.btn-ready:active{background:var(--primary-d);}
+.btn-reject{flex:0 0 auto;width:44px;height:44px;background:rgba(232,80,58,0.1);border:1.5px solid rgba(232,80,58,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+.rest-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:14px 18px;}
+.rest-stat{background:var(--dark2);border:1px solid var(--bd);border-radius:12px;padding:11px 8px;text-align:center;}
+.rest-stat-val{font-family:var(--h);font-weight:900;font-size:17px;color:#fff;}
+.rest-stat-lb{font-size:9.5px;color:var(--t2);margin-top:2px;}
+.menu-toggle-row{padding:0 18px 14px;}
+.menu-item-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--dark2);border:1px solid var(--bd);border-radius:14px;margin-bottom:8px;}
+.mit-left{display:flex;align-items:center;gap:10px;}
+.mit-emoji{font-size:20px;}
+.mit-info{flex:1;}
+.mit-name{font-family:var(--h);font-weight:600;font-size:13px;color:#fff;}
+.mit-price{font-size:11px;color:var(--t2);}
+.mit-toggle{width:44px;height:24px;border-radius:999px;position:relative;cursor:pointer;transition:background .2s;border:none;}
+.mit-toggle.on{background:var(--primary);}
+.mit-toggle.off{background:var(--dark4);}
+.mit-knob{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;transition:left .2s;}
+.mit-toggle.on .mit-knob{left:22px;}
+.mit-toggle.off .mit-knob{left:3px;}
+
+/* ── AREA MODAL ── */
+.area-modal{position:absolute;inset:0;background:rgba(6,18,28,0.85);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);opacity:0;}
+.area-modal.open{transform:translateY(0);opacity:1;}
+.area-sheet{background:var(--dark2);border-radius:28px 28px 0 0;padding:24px 20px 40px;border:1px solid var(--bd);border-bottom:none;width:100%;}
+.area-handle{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 20px;}
+.area-title{font-family:var(--h);font-weight:800;font-size:20px;color:#fff;margin-bottom:16px;letter-spacing:-0.02em;}
+.area-list{display:flex;flex-direction:column;gap:8px;}
+.area-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--dark3);border:1.5px solid var(--bd);border-radius:14px;cursor:pointer;transition:all .2s;}
+.area-item.sel{border-color:var(--primary);background:rgba(30,158,90,0.08);}
+.area-item-l{display:flex;align-items:center;gap:12px;}
+.area-name{font-family:var(--h);font-weight:700;font-size:14px;color:#fff;}
+.area-dist{font-size:11.5px;color:var(--t2);margin-top:2px;}
+.area-check{width:22px;height:22px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:11px;}
+
+/* ── SPLASH ── */
+#splash{position:absolute;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity 0.6s;}
+#splash.gone{opacity:0;pointer-events:none;}
+.splash-logo{width:80px;height:80px;background:var(--primary);border-radius:26px;display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:24px;position:relative;box-shadow:0 20px 50px rgba(30,158,90,0.4);}
+.splash-check{position:absolute;bottom:-4px;right:-4px;width:26px;height:26px;background:var(--sea);border-radius:50%;border:3px solid var(--dark);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
+.splash-title{font-family:var(--h);font-weight:900;font-size:36px;letter-spacing:-0.04em;color:#fff;}
+.splash-sub{font-family:var(--b);font-size:14px;color:var(--t2);margin-top:8px;}
+.splash-bar{width:160px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:32px;overflow:hidden;}
+.splash-progress{height:100%;width:0;background:var(--primary);border-radius:2px;animation:prog 1.8s ease forwards;}
+@keyframes prog{to{width:100%;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.splash-logo,.splash-title,.splash-sub{animation:fadeUp 0.6s ease both;}
+.splash-title{animation-delay:.15s;}
+.splash-sub{animation-delay:.25s;}
+.splash-bar{animation:fadeUp .5s .35s ease both;}
+
+/* CART TOAST */
+.cart-toast{position:absolute;bottom:90px;left:18px;right:18px;background:var(--primary);border-radius:16px;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 24px rgba(30,158,90,0.4);transform:translateY(120px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);z-index:60;}
+.cart-toast.show{transform:translateY(0);}
+.cart-toast-info{font-family:var(--h);font-weight:700;color:#fff;font-size:13px;}
+.cart-toast-count{background:rgba(0,0,0,0.25);color:#fff;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--h);font-weight:900;font-size:14px;}
+
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(.85);}}
+</style>
+</head>
+<body>
+
+<div class="device" id="app">
+  <div class="notch"></div>
+
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="splash-logo">🌿<div class="splash-check">✓</div></div>
+    <div class="splash-title">OverBerg<span style="color:var(--primary)">Go</span></div>
+    <div class="splash-sub">Struisbaai · L'Agulhas · Arniston</div>
+    <div class="splash-bar"><div class="splash-progress"></div></div>
+  </div>
+
+  <!-- AREA SELECTOR MODAL -->
+  <div class="area-modal" id="areaModal">
+    <div class="area-sheet">
+      <div class="area-handle"></div>
+      <div class="area-title">Delivering to</div>
+      <div class="area-list">
+        <div class="area-item sel" onclick="selectArea('Struisbaai')">
+          <div class="area-item-l"><span style="font-size:22px;">🌊</span>
+            <div><div class="area-name">Struisbaai</div><div class="area-dist">0.3 km away · 15 min ETA</div></div></div>
+          <div class="area-check">✓</div>
+        </div>
+        <div class="area-item" onclick="selectArea('L\'Agulhas')">
+          <div class="area-item-l"><span style="font-size:22px;">⚓</span>
+            <div><div class="area-name">L'Agulhas</div><div class="area-dist">4.2 km away · 22 min ETA</div></div></div>
+        </div>
+        <div class="area-item" onclick="selectArea('Arniston')">
+          <div class="area-item-l"><span style="font-size:22px;">⛵</span>
+            <div><div class="area-name">Arniston (Waenhuiskrans)</div><div class="area-dist">22 km away · 35 min ETA</div></div></div>
+        </div>
+        <div class="area-item" onclick="selectArea('Bredasdorp')">
+          <div class="area-item-l"><span style="font-size:22px;">🏘️</span>
+            <div><div class="area-name">Bredasdorp</div><div class="area-dist">35 km away · 45 min ETA</div></div></div>
+        </div>
+        <div class="area-item" onclick="selectArea('Hermanus')">
+          <div class="area-item-l"><span style="font-size:22px;">🐋</span>
+            <div><div class="area-name">Hermanus</div><div class="area-dist">78 km away · 65 min ETA</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ HOME SCREEN ════ -->
+  <div class="screen active" id="s-home">
+    <div class="sbar">
+      <span>09:41</span>
+      <div class="sbar-r">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><rect x="0" y="4" width="3" height="8" rx="1" fill="white" opacity=".4"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1" fill="white" opacity=".7"/><rect x="9" y=".5" width="3" height="11.5" rx="1" fill="white" opacity=".9"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" fill="white"/></svg>
+        <div class="batt"><div class="batt-fill"></div></div>
+      </div>
+    </div>
+    <div class="loc-row">
+      <div onclick="openArea()" style="cursor:pointer;">
+        <div class="loc-lbl">Delivering to</div>
+        <div class="loc-val">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#1E9E5A"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span id="currentArea">Struisbaai</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="icon-btn">🔔<div class="badge-dot"></div></div>
+        <div class="avatar">E</div>
+      </div>
+    </div>
+    <div class="px" style="padding-top:14px;padding-bottom:12px;">
+      <div class="greeting">Good morning 👋<br><span style="color:var(--t2);font-weight:600;font-size:19px;">What do you need?</span></div>
+      <div class="searchbar" onclick="goFood()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Food, rides, experiences...</span>
+      </div>
+    </div>
+    <div class="weather-strip">
+      <span style="font-size:20px;">🌤️</span>
+      <span style="font-family:var(--h);font-weight:700;font-size:13px;">21°C</span>
+      <div style="width:1px;height:14px;background:var(--bd2);"></div>
+      <span style="font-size:12px;color:var(--t2);">Partly Cloudy · Struisbaai</span>
+      <div class="w-live">Live</div>
+    </div>
+    <div class="px" style="padding-bottom:16px;">
+      <div class="sec"><div class="sec-t">Services</div><div class="sec-a" onclick="goExperiences()">Explore all</div></div>
+      <div class="svc-grid">
+        <div class="svc" onclick="goFood()">
+          <div class="svc-wrap" style="background:rgba(232,80,58,0.12);border-color:rgba(232,80,58,0.25);">🍽️</div>
+          <div class="svc-lb">Food</div>
+        </div>
+        <div class="svc" onclick="goRide()">
+          <div class="svc-wrap" style="background:rgba(30,158,90,0.12);border-color:rgba(30,158,90,0.3);">🚗</div>
+          <div class="svc-lb">Ride</div>
+        </div>
+        <div class="svc" onclick="goPnP()">
+          <div class="svc-wrap" style="background:rgba(204,31,26,0.12);border-color:rgba(204,31,26,0.25);position:relative;">🛒
+            <div style="position:absolute;bottom:-3px;right:-3px;background:#cc1f1a;color:#fff;font-size:7px;font-weight:900;padding:1px 4px;border-radius:4px;font-family:var(--h);">PnP</div>
+          </div>
+          <div class="svc-lb">Groceries</div>
+        </div>
+        <div class="svc" onclick="goExperiences()">
+          <div class="svc-wrap" style="background:rgba(14,158,194,0.12);border-color:rgba(14,158,194,0.3);">⚓</div>
+          <div class="svc-lb">Go to Sea</div>
+        </div>
+        <div class="svc" onclick="goStays()">
+          <div class="svc-wrap" style="background:rgba(30,158,90,0.12);border-color:rgba(30,158,90,0.2);">🏡</div>
+          <div class="svc-lb">Guest Houses</div>
+        </div>
+        <div class="svc" onclick="goExperiences()">
+          <div class="svc-wrap" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.2);">🐕</div>
+          <div class="svc-lb">Dog Walker</div>
+        </div>
+        <div class="svc" onclick="goExperiences()">
+          <div class="svc-wrap" style="background:rgba(14,122,153,0.15);border-color:rgba(14,158,194,0.25);">🐟</div>
+          <div class="svc-lb">Fresh Fish</div>
+        </div>
+        <div class="svc" onclick="goExperiences()">
+          <div class="svc-wrap" style="background:var(--dark3);border-color:var(--bd2);">···</div>
+          <div class="svc-lb">More</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="px sec"><div class="sec-t">Deals for you</div><div class="sec-a">See all</div></div>
+      <div class="promo-row">
+        <div class="promo" style="background:linear-gradient(135deg,#061a0f,#0a2e1a);border-color:rgba(30,158,90,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <span style="font-size:24px;">⚓</span>
+            <span class="p-code" style="background:rgba(30,158,90,0.2);color:var(--primary);">SEA20</span>
+          </div>
+          <div class="p-title">Go to Sea</div>
+          <div class="p-desc">20% off boat experiences</div>
+        </div>
+        <div class="promo" style="background:linear-gradient(135deg,#072530,#0a2e3d);border-color:rgba(14,158,194,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <span style="font-size:24px;">🐟</span>
+            <span class="p-code" style="background:rgba(14,158,194,0.2);color:var(--sea);">FRESHFISH</span>
+          </div>
+          <div class="p-title">Catch of the Day</div>
+          <div class="p-desc">R30 off fresh fish delivery</div>
+        </div>
+        <div class="promo" style="background:linear-gradient(135deg,#200d0d,#2d1010);border-color:rgba(204,31,26,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <span style="font-size:24px;">🛒</span>
+            <span class="p-code" style="background:rgba(204,31,26,0.2);color:#e84040;">PNPSAVE</span>
+          </div>
+          <div class="p-title">PnP Smart Deal</div>
+          <div class="p-desc">R50 off grocery orders R300+</div>
+        </div>
+        <div class="promo" style="background:linear-gradient(135deg,#1a1200,#261900);border-color:rgba(245,166,35,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <span style="font-size:24px;">⭐</span>
+            <span class="p-code" style="background:rgba(245,166,35,0.2);color:var(--sun);">NEWUSER</span>
+          </div>
+          <div class="p-title">Welcome Offer</div>
+          <div class="p-desc">40% off your first order</div>
+        </div>
+      </div>
+    </div>
+    <div class="px" style="padding-bottom:20px;">
+      <div class="sec"><div class="sec-t">🔥 Popular right now</div><div class="sec-a" onclick="goFood()">See all</div></div>
+      <div onclick="openMenu(0)" class="r-card">
+        <div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#0a1e2a,#061420);">🦐</div><div class="r-overlay"></div><div class="r-pill">★ 4.8 <span style="color:rgba(255,255,255,0.5)">(312)</span></div><div class="r-tag">Seafood</div></div>
+        <div class="r-info"><div class="r-name">Harbour Café</div><div class="r-sub">Seafood platter · Harbour views · Fresh catch daily</div><div class="r-meta">🕐 20 min <div class="dot"></div> R35 delivery <div class="dot"></div> Struisbaai Harbour</div></div>
+      </div>
+      <div onclick="openMenu(1)" class="r-card">
+        <div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#1a0d05,#0d0800);">🍺</div><div class="r-overlay"></div><div class="r-pill">★ 4.5 <span style="color:rgba(255,255,255,0.5)">(187)</span></div><div class="r-tag">Irish Pub</div></div>
+        <div class="r-info"><div class="r-name">Michael Collins Irish Pub</div><div class="r-sub">Tapas · Burgers · Pizza · Beer garden</div><div class="r-meta">🕐 25 min <div class="dot"></div> R35 delivery</div></div>
+      </div>
+    </div>
+    <div style="height:90px;"></div>
+  </div>
+
+  <!-- ════ FOOD SCREEN ════ -->
+  <div class="screen" id="s-food">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="px" style="padding-top:10px;padding-bottom:14px;">
+      <div style="font-family:var(--h);font-weight:900;font-size:22px;letter-spacing:-0.03em;margin-bottom:12px;">Restaurants <span style="color:var(--primary);">near you</span></div>
+      <div class="searchbar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Search restaurants...</span></div>
+    </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:0 18px 16px;scrollbar-width:none;">
+      <div class="chip on">🍽️ All</div><div class="chip">🐟 Seafood</div><div class="chip">🍕 Italian</div><div class="chip">🍺 Pub</div><div class="chip">☕ Café</div><div class="chip">🇿🇦 SA</div>
+    </div>
+    <div class="px">
+      <div onclick="openMenu(0)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#0a1e2a,#061420);">🦐</div><div class="r-overlay"></div><div class="r-pill">★ 4.8</div><div class="r-tag">Seafood</div></div><div class="r-info"><div class="r-name">Harbour Café</div><div class="r-sub">Seafood platter · Calamari · Hake · Harbour views</div><div class="r-meta">🕐 20 min <div class="dot"></div> R35 delivery <div class="dot"></div> Struisbaai Harbour</div></div></div>
+      <div onclick="openMenu(1)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#1a0d05,#0d0800);">🍺</div><div class="r-overlay"></div><div class="r-pill">★ 4.5</div><div class="r-tag">Irish Pub</div></div><div class="r-info"><div class="r-name">Michael Collins Irish Pub</div><div class="r-sub">Tapas · Burgers · Pizza · Beer garden</div><div class="r-meta">🕐 25 min <div class="dot"></div> R35 delivery</div></div></div>
+      <div onclick="openMenu(2)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#061e1a,#031510);">🐟</div><div class="r-overlay"></div><div class="r-pill">★ 4.7</div><div class="r-tag">Takeaway</div></div><div class="r-info"><div class="r-name">Fish &amp; More</div><div class="r-sub">Yellowtail · Snoek · Hake · Fresh daily catch</div><div class="r-meta">🕐 15 min <div class="dot"></div> R25 delivery <div class="dot"></div> 66 Main Road</div></div></div>
+      <div onclick="openMenu(3)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#1a1005,#100a00);">🍕</div><div class="r-overlay"></div><div class="r-pill">★ 4.6</div><div class="r-tag">Italian</div></div><div class="r-info"><div class="r-name">Gavin's Trattoria Agulhas</div><div class="r-sub">Yellowtail · Fettuccine · Brisket pizza · Family run</div><div class="r-meta">🕐 30 min <div class="dot"></div> R38 delivery <div class="dot"></div> L'Agulhas</div></div></div>
+      <div onclick="openMenu(3)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#0f1a2a,#08111a);">🍝</div><div class="r-overlay"></div><div class="r-pill">★ 4.9</div><div class="r-tag">Italian</div></div><div class="r-info"><div class="r-name">Pret Restaurant</div><div class="r-sub">Coastal Italian · Attentive service · L'Agulhas</div><div class="r-meta">🕐 35 min <div class="dot"></div> R40 delivery</div></div></div>
+      <div onclick="openMenu(0)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#0a1a10,#060f0a);">☕</div><div class="r-overlay"></div><div class="r-pill">★ 4.6</div><div class="r-tag">Café</div></div><div class="r-info"><div class="r-name">Suidpunt Potpourri</div><div class="r-sub">Coffee · Scones · Cakes · Gift shop · Southernmost café</div><div class="r-meta">🕐 20 min <div class="dot"></div> R28 delivery <div class="dot"></div> 115 Main Rd</div></div></div>
+      <div onclick="openMenu(0)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#101a08,#0a1205);">🇿🇦</div><div class="r-overlay"></div><div class="r-pill">★ 4.4</div><div class="r-tag">SA Cuisine</div></div><div class="r-info"><div class="r-name">Zuidste Kaap Restaurant</div><div class="r-sub">Traditional SA breakfast · Lunch · Family dining</div><div class="r-meta">🕐 28 min <div class="dot"></div> R32 delivery <div class="dot"></div> 99 Main Rd</div></div></div>
+      <div class="r-card" style="opacity:.6;"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#1a0520,#0d031a);filter:saturate(0.4);">🎵</div><div class="r-overlay"></div><div class="closed-mask"><div class="closed-chip">Opens 17:00</div></div><div class="r-pill">★ 4.3</div><div class="r-tag">Bar & Events</div></div><div class="r-info"><div class="r-name">The Shed</div><div class="r-meta">🕐 20 min <div class="dot"></div> Struisbaai</div></div></div>
+      <div onclick="openMenu(1)" class="r-card"><div class="r-hero"><div class="r-bg" style="background:linear-gradient(160deg,#1a1005,#0f0800);">🍟</div><div class="r-overlay"></div><div class="r-pill">★ 4.2</div><div class="r-tag">Grill & Pub</div></div><div class="r-info"><div class="r-name">Thirsty's Pub</div><div class="r-sub">Pool tables · Fresh pub food · Cold beer · Local favourite</div><div class="r-meta">🕐 22 min <div class="dot"></div> R30 delivery</div></div></div>
+    </div>
+    <div style="height:90px;"></div>
+  </div>
+
+  <!-- ════ MENU SCREEN ════ -->
+  <div class="screen" id="s-menu">
+    <div class="sbar" style="position:absolute;top:0;left:0;right:0;z-index:20;"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="menu-hero">
+      <div class="menu-hero-bg" id="menuHeroBg" style="background:linear-gradient(160deg,#0a1e2a,#061420);" data-emoji="🦐"></div>
+      <div class="menu-hero-overlay"></div>
+      <div style="position:absolute;top:50px;left:18px;z-index:5;"><div class="back" onclick="showFood()">←</div></div>
+      <div class="menu-info">
+        <div class="menu-name" id="menuName">Harbour Café</div>
+        <div class="menu-meta"><span>★ 4.8 (312)</span><div class="dot"></div><span>🕐 20 min</span><div class="dot"></div><span>R35 delivery</span></div>
+      </div>
+    </div>
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab on" onclick="switchCat(this)">Starters</div>
+      <div class="cat-tab" onclick="switchCat(this)">Mains</div>
+      <div class="cat-tab" onclick="switchCat(this)">Seafood</div>
+      <div class="cat-tab" onclick="switchCat(this)">Sides</div>
+      <div class="cat-tab" onclick="switchCat(this)">Drinks</div>
+      <div class="cat-tab" onclick="switchCat(this)">Desserts</div>
+    </div>
+    <div id="menuItems">
+      <div class="menu-item" onclick="addToCart()"><div class="mi-img">🍤</div><div class="mi-info"><div class="mi-name">Calamari Rings</div><div class="mi-desc">Lightly battered, with tartare sauce.</div><div class="mi-price">R89</div></div><button class="add-btn">+</button></div>
+      <div class="menu-item" onclick="addToCart()"><div class="mi-img">🥗</div><div class="mi-info"><div class="mi-name">Prawn Cocktail</div><div class="mi-desc">Tiger prawns, lettuce, Marie Rose sauce</div><div class="mi-price">R110</div></div><button class="add-btn">+</button></div>
+      <div class="menu-item" onclick="addToCart()"><div class="mi-img">🦑</div><div class="mi-info"><div class="mi-name">Calamari Tubes</div><div class="mi-desc">Grilled or fried, lemon butter</div><div class="mi-price">R95</div></div><button class="add-btn">+</button></div>
+      <div class="menu-item" onclick="addToCart()"><div class="mi-img">🍜</div><div class="mi-info"><div class="mi-name">Crayfish Bisque</div><div class="mi-desc">West Coast rock lobster soup, cream, brandy</div><div class="mi-price">R78</div></div><button class="add-btn">+</button></div>
+      <div class="menu-item" onclick="addToCart()"><div class="mi-img">🥩</div><div class="mi-info"><div class="mi-name">Harbour Mezze</div><div class="mi-desc">Sharing platter — calamari, fish bites, chips, dips</div><div class="mi-price">R145</div></div><button class="add-btn">+</button></div>
+    </div>
+    <div style="height:160px;"></div>
+    <div class="cart-bar" id="cartBar" onclick="alert('Checkout flow — live integration coming!')">
+      <div><div style="font-family:var(--h);font-weight:800;color:#fff;font-size:15px;">View Order</div><div style="font-size:12px;color:rgba(255,255,255,0.75);" id="cartCount">1 item</div></div>
+      <div style="font-family:var(--h);font-weight:900;font-size:17px;color:#fff;" id="cartTotal">R89</div>
+    </div>
+  </div>
+
+  <!-- ════ RIDE SCREEN ════ -->
+  <div class="screen" id="s-ride">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="px" style="padding-top:8px;padding-bottom:14px;">
+      <div style="font-family:var(--h);font-weight:900;font-size:22px;letter-spacing:-0.03em;">Book a <span style="color:var(--primary)">Ride</span></div>
+    </div>
+    <div class="map-zone">
+      <div class="map-grid">
+        <div class="grid-h" style="top:25%"></div><div class="grid-h" style="top:50%"></div><div class="grid-h" style="top:75%"></div>
+        <div class="grid-v" style="left:25%"></div><div class="grid-v" style="left:50%"></div><div class="grid-v" style="left:75%"></div>
+      </div>
+      <div class="route-line"></div>
+      <div class="map-pin" style="top:28%;left:38%;"><div class="pin-dot" style="background:var(--primary);"></div><div class="pin-lbl">Marine 127</div></div>
+      <div class="map-pin" style="top:55%;left:62%;"><div class="pin-dot" style="background:var(--sea);"></div><div class="pin-lbl">Spar Struisbaai</div></div>
+      <div class="car-marker" style="left:48%;top:40%;">🚗</div>
+      <div class="car-marker" style="left:30%;top:60%;animation-delay:-2s;font-size:18px;opacity:.6;">🚗</div>
+      <div style="position:absolute;top:12px;right:14px;background:rgba(30,158,90,0.9);backdrop-filter:blur(8px);border-radius:12px;padding:8px 14px;">
+        <div style="font-family:var(--h);font-weight:800;font-size:13px;color:#fff;">3 min away</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.8);">Nearest driver</div>
+      </div>
+    </div>
+    <div class="addr-inputs">
+      <div class="addr-field"><div class="addr-dot" style="background:var(--primary);"></div><div class="addr-text filled">Marine 127, Struisbaai</div></div>
+      <div class="conn-line"></div>
+      <div class="addr-field"><div class="addr-dot" style="background:var(--sea);"></div><div class="addr-text">Where to?</div></div>
+    </div>
+    <div class="places-row">
+      <div class="place-chip"><span style="font-size:16px;">🏠</span><span>Home</span></div>
+      <div class="place-chip"><span style="font-size:16px;">🛒</span><span>Spar</span></div>
+      <div class="place-chip"><span style="font-size:16px;">🏥</span><span>Clinic</span></div>
+      <div class="place-chip"><span style="font-size:16px;">✈️</span><span>Airport</span></div>
+      <div class="place-chip"><span style="font-size:16px;">🏖️</span><span>Beach</span></div>
+      <div class="place-chip"><span style="font-size:16px;">💡</span><span>Lighthouse</span></div>
+    </div>
+    <div class="px sec" style="margin-bottom:0;"><div class="sec-t">Choose ride type</div></div>
+    <div class="ride-types" style="padding-top:12px;">
+      <div class="ride-card sel" onclick="selectRide(this)"><div style="font-size:24px;margin-bottom:6px;">🚗</div><div class="ride-n">GoRide</div><div class="ride-p">R55</div><div class="ride-eta">4 min · 1-3 pax</div></div>
+      <div class="ride-card" onclick="selectRide(this)"><div style="font-size:24px;margin-bottom:6px;">🚙</div><div class="ride-n">GoPremium</div><div class="ride-p">R85</div><div class="ride-eta">6 min · 1-4 pax</div></div>
+      <div class="ride-card" onclick="selectRide(this)"><div style="font-size:24px;margin-bottom:6px;">🚐</div><div class="ride-n">GoXL</div><div class="ride-p">R110</div><div class="ride-eta">8 min · 5-7 pax</div></div>
+    </div>
+    <div class="driver-card">
+      <div class="d-av">👤</div>
+      <div>
+        <div class="d-name">Sipho Ndlovu</div>
+        <div class="d-stars">★ 4.93 <span style="color:var(--t2);font-weight:400;">(847 trips)</span></div>
+        <div class="d-plate">CA 234 567</div>
+      </div>
+      <div class="d-actions">
+        <div class="d-act" style="background:rgba(30,158,90,0.12);border:1px solid rgba(30,158,90,0.25);">📞</div>
+        <div class="d-act" style="background:rgba(14,158,194,0.12);border:1px solid rgba(14,158,194,0.25);">💬</div>
+      </div>
+    </div>
+    <div class="px" style="padding-bottom:100px;">
+      <button class="btn-primary" onclick="alert('Booking GoRide — Driver Sipho is 3 min away. Live integration coming!')">Book GoRide · R55</button>
+    </div>
+  </div>
+
+  <!-- ════ PnP SCREEN ════ -->
+  <div class="screen" id="s-pnp">
+    <div class="sbar" style="position:absolute;top:0;left:0;right:0;z-index:20;"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="pnp-hdr" style="padding-top:52px;">
+      <div class="pnp-logo-row">
+        <div class="pnp-logo">PnP</div>
+        <div>
+          <div style="font-family:var(--h);font-weight:800;font-size:18px;color:#fff;">Pick n Pay</div>
+          <div style="display:flex;gap:6px;margin-top:5px;"><span class="pnp-badge">In-store prices</span><span class="pnp-badge">45 min delivery</span></div>
+        </div>
+      </div>
+      <div class="pnp-smart">
+        <span style="font-size:18px;">⭐</span>
+        <div style="flex:1;"><div style="font-family:var(--h);font-weight:700;font-size:12px;color:#fff;">Smart Shopper linked · 3,240 pts</div><div class="smart-bar"><div class="smart-fill"></div></div></div>
+        <span style="font-family:var(--h);font-weight:700;font-size:11px;color:rgba(255,255,255,0.75);">1,760 to Gold</span>
+      </div>
+    </div>
+    <div style="margin:12px 18px;padding:10px 14px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:13px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">🏷️</span>
+      <div><div style="font-family:var(--h);font-weight:700;font-size:13px;color:var(--sun);">Weekend Specials Active</div><div style="font-size:11px;color:var(--t2);">Up to 40% off on selected items</div></div>
+    </div>
+    <div style="padding:0 18px 0;"><div class="sec"><div class="sec-t">Browse by aisle</div></div></div>
+    <div class="pnp-cats">
+      <div class="pnp-cat"><div class="pnp-cat-ic">🥦</div><div class="pnp-cat-lb">Produce</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🥩</div><div class="pnp-cat-lb">Meat</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🥛</div><div class="pnp-cat-lb">Dairy</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🍞</div><div class="pnp-cat-lb">Bakery</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🧴</div><div class="pnp-cat-lb">Health</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🍷</div><div class="pnp-cat-lb">Liquor</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🧊</div><div class="pnp-cat-lb">Frozen</div></div>
+      <div class="pnp-cat"><div class="pnp-cat-ic">🐾</div><div class="pnp-cat-lb">Pets</div></div>
+    </div>
+    <div class="px" style="margin-bottom:12px;"><div class="sec"><div class="sec-t">🔥 Weekend deals</div><div class="sec-a">See all</div></div></div>
+    <div class="prod-grid">
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🥩<div class="sale-badge">-30%</div></div><div class="prod-info"><div class="prod-name">Beef Braai Pack 1kg</div><div class="prod-row"><div class="prod-price">R89.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🧀<div class="sale-badge">-20%</div></div><div class="prod-info"><div class="prod-name">Cheddar 400g</div><div class="prod-row"><div class="prod-price">R39.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🥚</div><div class="prod-info"><div class="prod-name">Free Range Eggs 6pk</div><div class="prod-row"><div class="prod-price">R32.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🍎</div><div class="prod-info"><div class="prod-name">Pink Lady Apples 1kg</div><div class="prod-row"><div class="prod-price">R29.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🐟<div class="sale-badge">-15%</div></div><div class="prod-info"><div class="prod-name">Yellowtail Fillet 400g</div><div class="prod-row"><div class="prod-price">R74.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🥖</div><div class="prod-info"><div class="prod-name">White Bread 700g</div><div class="prod-row"><div class="prod-price">R18.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🥦</div><div class="prod-info"><div class="prod-name">Broccoli Head</div><div class="prod-row"><div class="prod-price">R19.99</div><button class="prod-add">+</button></div></div></div>
+      <div class="prod" onclick="addPnP()"><div class="prod-img">🍊<div class="sale-badge">-25%</div></div><div class="prod-info"><div class="prod-name">Navel Oranges 1.5kg</div><div class="prod-row"><div class="prod-price">R24.99</div><button class="prod-add">+</button></div></div></div>
+    </div>
+  </div>
+
+  <!-- ════ EXPERIENCES SCREEN ════ -->
+  <div class="screen" id="s-exp">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="px" style="padding-top:10px;padding-bottom:14px;">
+      <div style="font-family:var(--h);font-weight:900;font-size:22px;letter-spacing:-0.03em;margin-bottom:4px;">Experiences <span style="color:var(--primary);">& Services</span></div>
+      <div style="font-size:12px;color:var(--t2);">Struisbaai · L'Agulhas · Arniston</div>
+    </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:0 18px 16px;scrollbar-width:none;">
+      <div class="chip on">All</div><div class="chip">⛵ Sea</div><div class="chip">🐕 Pets</div><div class="chip">🏡 Stays</div><div class="chip">🎣 Fishing</div><div class="chip">🚴 Active</div>
+    </div>
+    <div class="px" style="padding-bottom:100px;">
+
+      <!-- Go to Sea -->
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--sea);margin-bottom:10px;display:flex;align-items:center;gap:6px;">⛵ On the Water</div>
+      <div class="exp-card" onclick="showToast('Sea experience booked!')">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#061e2e,#04131f);">⛵<div class="exp-badge">★ 4.9 · Sold out weekends</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Southern Tip Sea Adventures</div>
+          <div class="exp-desc">Boat trips from Struisbaai Harbour — whale watching, seal colonies, sunsets, birding tours. PADI dive centre on-site.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 2–4 hrs · from</span><div class="exp-price">R380/pax</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Booking enquiry sent!')">Book Now</button></div>
+        </div>
+      </div>
+      <div class="exp-card" onclick="showToast('Fishing charter booked!')">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#041520,#020d17);">🎣<div class="exp-badge">★ 4.8</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Awesome Charters — Saltwater Fishing</div>
+          <div class="exp-desc">Deep sea & surf fishing at the southernmost tip of Africa. Yellowtail, snoek, tuna. All tackle provided.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 Half or full day</span><div class="exp-price">R650/pax</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Charter booked!')">Book Now</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#071a28,#041018);">🤿<div class="exp-badge">★ 4.7 · PADI Certified</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Dive Struisbaai — Scuba & Snorkelling</div>
+          <div class="exp-desc">PADI dive courses, snorkelling experiences, and underwater guided tours. Warm Indian Ocean, visibility up to 12m.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 3 hrs · from</span><div class="exp-price">R420/pax</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Dive session booked!')">Book Now</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#041e2a,#021218);">🐠<div class="exp-badge">Free · Daily</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Swim with Stingrays at the Harbour</div>
+          <div class="exp-desc">Struisbaai's famous harbour stingrays — Parrie and friends are gentle and habituated to people. Feed them by hand.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 30 min · Daily 9–11am</span><div class="exp-price">Free entry</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Reminder set!')">Remind me</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#0a1a2a,#061018);">🏄<div class="exp-badge">★ 4.6 · Beginner friendly</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Robbie's Surf School</div>
+          <div class="exp-desc">Learn to surf on Struisbaai's gentle Indian Ocean wave. Perfect for beginners. Board & wetsuit included.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 2 hrs · from</span><div class="exp-price">R350/pax</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Surf lesson booked!')">Book Now</button></div>
+        </div>
+      </div>
+
+      <!-- Dog Walker -->
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--sun);margin:20px 0 10px;display:flex;align-items:center;gap:6px;">🐕 Pet Services</div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#1a1005,#100800);">🐕<div class="exp-badge">★ 4.9 · Top Rated</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Beach Dog Walker — Struisbaai</div>
+          <div class="exp-desc">Daily morning & afternoon walks along South Africa's longest beach. GPS tracked. Fully insured. Pickup & drop off.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 1 hr · from</span><div class="exp-price">R120/walk</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Walker booked!')">Book Now</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#1a0d05,#0f0800);">😺<div class="exp-badge">★ 4.8</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Pet Sitting & House Minding</div>
+          <div class="exp-desc">Trusted local sitters for cats, dogs, and small animals. Overnight stays available. Background checked.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">Per night · from</span><div class="exp-price">R200/night</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Sitter booked!')">Book Now</button></div>
+        </div>
+      </div>
+
+      <!-- Active/Explore -->
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--primary);margin:20px 0 10px;display:flex;align-items:center;gap:6px;">🚴 Explore the Overberg</div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#0a1a08,#061005);">🚴<div class="exp-badge">★ 4.8 · Popular</div></div>
+        <div class="exp-info">
+          <div class="exp-name">E-Bike & Bicycle Hire</div>
+          <div class="exp-desc">Explore the Agulhas Plain and coastal trails on quality bikes. Route maps included. Struisbaai to Arniston trail available.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 Half/full day</span><div class="exp-price">R150/day</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Bike hire booked!')">Book Now</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#0d1a06,#081005);">🥾<div class="exp-badge">Free · Self-guided</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Agulhas National Park Hiking</div>
+          <div class="exp-desc">Shipwreck trail, Rasperpunt hike & lighthouse trail inside the national park. Guided options available. Fynbos, birds, coastal views.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 2–5 hrs · from</span><div class="exp-price">R80 entry</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Guide booked!')">Book Guide</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#1a0a05,#0f0500);">🐴<div class="exp-badge">★ 4.7</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Horse Riding Along the Beach</div>
+          <div class="exp-desc">Sunrise & sunset rides on Struisbaai's white sand beach. All levels welcome. SA's longest natural beach.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 1.5 hrs · from</span><div class="exp-price">R280/pax</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Ride booked!')">Book Now</button></div>
+        </div>
+      </div>
+
+      <!-- Culture & History -->
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--sea);margin:20px 0 10px;display:flex;align-items:center;gap:6px;">🏛️ Culture & History</div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#1a1505,#0f0e05);">💡<div class="exp-badge">★ 4.9 · Heritage Site</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Cape Agulhas Lighthouse Museum</div>
+          <div class="exp-desc">Africa's only lighthouse museum. Climb to the top for ocean views. Operating since 1848, second-oldest in SA.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 45 min</span><div class="exp-price">R60 entry</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Tickets booked!')">Buy Tickets</button></div>
+        </div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#1a0a14,#0f0510);">🚢<div class="exp-badge">★ 4.7</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Shipwreck Museum — Bredasdorp</div>
+          <div class="exp-desc">150 ships wrecked along this coastline. Extraordinary collection of artifacts from maritime disasters spanning centuries.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 1–2 hrs</span><div class="exp-price">R50 entry</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Tickets booked!')">Buy Tickets</button></div>
+        </div>
+      </div>
+
+      <!-- Wine Route -->
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--coral);margin:20px 0 10px;display:flex;align-items:center;gap:6px;">🍷 Agulhas Wine Route</div>
+      <div class="exp-card">
+        <div class="exp-hero" style="background:linear-gradient(160deg,#1a0520,#0d0318);">🍷<div class="exp-badge">★ 4.8 · Award-winning</div></div>
+        <div class="exp-info">
+          <div class="exp-name">Cape Agulhas Wine Route Tour</div>
+          <div class="exp-desc">Cool-climate Elim wines. Unique terroir exciting winemakers worldwide. Guided tastings, cellar tours, picnics. Private transfer included.</div>
+          <div class="exp-meta"><span style="font-size:11px;color:var(--t2);">🕐 Half day · from</span><div class="exp-price">R450/pax</div><button class="exp-book-btn" onclick="event.stopPropagation();showToast('Wine tour booked!')">Book Now</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ GUEST HOUSES / STAYS ════ -->
+  <div class="screen" id="s-stays">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="px" style="padding-top:10px;padding-bottom:14px;">
+      <div style="font-family:var(--h);font-weight:900;font-size:22px;letter-spacing:-0.03em;margin-bottom:4px;">Guest Houses <span style="color:var(--primary);">&amp; Stays</span></div>
+      <div style="font-size:12px;color:var(--t2);">Local accommodation in the Overberg</div>
+    </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:0 18px 16px;scrollbar-width:none;">
+      <div class="chip on">All</div><div class="chip">🏡 Self-Catering</div><div class="chip">🛎️ B&amp;B</div><div class="chip">🏨 Boutique</div><div class="chip">🏕️ Camping</div>
+    </div>
+    <div class="px" style="padding-bottom:100px;">
+
+      <div class="stay-card">
+        <div class="stay-hero" style="background:linear-gradient(160deg,#0a1e2a,#061420);">🌊
+          <div class="stay-badge-top">Struisbaai</div>
+          <div class="stay-badge-right">★ 4.9</div>
+        </div>
+        <div class="stay-info">
+          <div class="stay-name">Chateau de Marine Boutique Hotel</div>
+          <div class="stay-desc">9 luxury sea-facing rooms, private pool, 50m from beach. Voted best boutique stay in the Overberg.</div>
+          <div class="stay-meta">🛏️ 9 rooms <div class="dot"></div> 🏖️ Sea view <div class="dot"></div> <span class="stay-price">R2,800/night</span></div>
+        </div>
+      </div>
+      <div class="stay-card">
+        <div class="stay-hero" style="background:linear-gradient(160deg,#061a10,#04120a);">🌿
+          <div class="stay-badge-top">L'Agulhas</div>
+          <div class="stay-badge-right">★ 4.8</div>
+        </div>
+        <div class="stay-info">
+          <div class="stay-name">Agulhas Country Lodge</div>
+          <div class="stay-desc">Built from local limestone, blends into a hill overlooking both oceans. All rooms with sea views. Breakfast included.</div>
+          <div class="stay-meta">🛏️ B&amp;B <div class="dot"></div> 🌅 Ocean view <div class="dot"></div> <span class="stay-price">R1,800/night</span></div>
+        </div>
+      </div>
+      <div class="stay-card">
+        <div class="stay-hero" style="background:linear-gradient(160deg,#1a1008,#100a05);">⛵
+          <div class="stay-badge-top">Arniston</div>
+          <div class="stay-badge-right">★ 4.9</div>
+        </div>
+        <div class="stay-info">
+          <div class="stay-name">The Arniston Hotel</div>
+          <div class="stay-desc">Historic hotel in a national monument village. Steps from Kassiesbaai. Pool, restaurant, private beach access.</div>
+          <div class="stay-meta">🛏️ 12 rooms <div class="dot"></div> 🍽️ Restaurant <div class="dot"></div> <span class="stay-price">R2,200/night</span></div>
+        </div>
+      </div>
+      <div class="stay-card">
+        <div class="stay-hero" style="background:linear-gradient(160deg,#0a1a12,#061210);">🏡
+          <div class="stay-badge-top">Struisbaai</div>
+          <div class="stay-badge-right">★ 4.7</div>
+        </div>
+        <div class="stay-info">
+          <div class="stay-name">Casa Pescador Self-Catering</div>
+          <div class="stay-desc">The Fisherman's House — 2 min walk to beach. Fully equipped kitchen, braai area, private garden. 6-sleeper.</div>
+          <div class="stay-meta">🛏️ 6 sleeper <div class="dot"></div> 🔥 Braai <div class="dot"></div> <span class="stay-price">R1,400/night</span></div>
+        </div>
+      </div>
+      <div class="stay-card">
+        <div class="stay-hero" style="background:linear-gradient(160deg,#1a1a06,#10100a);">🌾
+          <div class="stay-badge-top">L'Agulhas</div>
+          <div class="stay-badge-right">★ 4.8</div>
+        </div>
+        <div class="stay-info">
+          <div class="stay-name">House of 2 Oceans</div>
+          <div class="stay-desc">Where the Atlantic meets the Indian. Private balcony overlooking the southern tip of Africa. Self-catering.</div>
+          <div class="stay-meta">🛏️ 2 bed <div class="dot"></div> 🌊 2 oceans <div class="dot"></div> <span class="stay-price">R1,600/night</span></div>
+        </div>
+      </div>
+      <div class="stay-card">
+        <div class="stay-hero" style="background:linear-gradient(160deg,#0a1510,#06100c);">🏕️
+          <div class="stay-badge-top">Struisbaai</div>
+          <div class="stay-badge-right">★ 4.6</div>
+        </div>
+        <div class="stay-info">
+          <div class="stay-name">Struisbaai Caravan Park</div>
+          <div class="stay-desc">Direct beach access. Powered sites, fully equipped ablutions, braai facilities. Book months ahead for school holidays.</div>
+          <div class="stay-meta">🏕️ 60 sites <div class="dot"></div> 🏖️ Beach <div class="dot"></div> <span class="stay-price">R280/night</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ ORDERS SCREEN ════ -->
+  <div class="screen" id="s-orders">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="px" style="padding-top:10px;padding-bottom:18px;">
+      <div style="font-family:var(--h);font-weight:900;font-size:22px;letter-spacing:-0.03em;margin-bottom:16px;">Your <span style="color:var(--primary)">Orders</span></div>
+      <div class="order-card" style="border-color:rgba(30,158,90,0.3);margin-bottom:12px;">
+        <div class="ord-status live"><span style="width:7px;height:7px;background:var(--primary);border-radius:50%;animation:pulse 1.5s infinite;"></span>On the way</div>
+        <div class="ord-rest">Harbour Café</div>
+        <div class="ord-items">Calamari Rings · Prawn Cocktail · 1x Coke</div>
+        <div class="track-bar">
+          <div class="track-steps">
+            <div class="t-step"><div class="t-circle done">✓</div><div class="t-lb active">Placed</div></div>
+            <div class="t-line done"></div>
+            <div class="t-step"><div class="t-circle done">✓</div><div class="t-lb active">Confirmed</div></div>
+            <div class="t-line done"></div>
+            <div class="t-step"><div class="t-circle active">🍳</div><div class="t-lb active">Preparing</div></div>
+            <div class="t-line"></div>
+            <div class="t-step"><div class="t-circle pending">🛵</div><div class="t-lb">On way</div></div>
+            <div class="t-line"></div>
+            <div class="t-step"><div class="t-circle pending">🏠</div><div class="t-lb">Delivered</div></div>
+          </div>
+        </div>
+        <div class="ord-bottom" style="margin-top:12px;"><div class="ord-total">R199 · ETA 12 min</div><div style="font-family:var(--h);font-weight:700;font-size:12px;color:var(--primary);">Track →</div></div>
+      </div>
+      <div style="font-family:var(--h);font-weight:700;font-size:14px;color:var(--t2);margin-bottom:10px;margin-top:4px;">Past orders</div>
+      <div class="order-card"><div class="ord-status done">Delivered</div><div class="ord-rest">Fish &amp; More</div><div class="ord-items">Yellowtail fillet · Chips · Tartare sauce</div><div class="ord-bottom"><div class="ord-total">R145</div><div class="ord-time">Yesterday, 19:34</div></div></div>
+      <div class="order-card"><div class="ord-status done">Delivered</div><div class="ord-rest">Pick n Pay</div><div class="ord-items">Braai pack · Rolls · 2x Castle Lager</div><div class="ord-bottom"><div class="ord-total">R312</div><div class="ord-time">Sun, 14:22</div></div></div>
+      <div class="order-card"><div class="ord-status done">Completed</div><div class="ord-rest">GoRide</div><div class="ord-items">Struisbaai Harbour → L'Agulhas town</div><div class="ord-bottom"><div class="ord-total">R68</div><div class="ord-time">Sat, 11:05</div></div></div>
+      <div class="order-card"><div class="ord-status done">Completed</div><div class="ord-rest">Sea Experience</div><div class="ord-items">Whale watching boat · 2 pax · Southern Tip Adventures</div><div class="ord-bottom"><div class="ord-total">R760</div><div class="ord-time">Fri, 07:30</div></div></div>
+    </div>
+  </div>
+
+  <!-- ════ PROFILE SCREEN ════ -->
+  <div class="screen" id="s-me">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="profile-hero">
+      <div class="p-av">E</div>
+      <div class="p-name">Eugene Hefer</div>
+      <div class="p-location">📍 Marine 127, Struisbaai · Member since 2026</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" style="color:var(--primary);">18</div><div class="stat-lb">Orders</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--sea);">3,240</div><div class="stat-lb">Smart pts</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--sun);">R80</div><div class="stat-lb">Saved</div></div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-row"><div class="menu-ic" style="background:rgba(30,158,90,0.1);">💳</div><div class="menu-row-txt"><div class="menu-row-title">Payment Methods</div><div class="menu-row-sub">Visa ···4521 · PayFast · SnapScan</div></div><span class="menu-arrow">›</span></div>
+      <div class="menu-row"><div class="menu-ic" style="background:rgba(14,158,194,0.1);">📍</div><div class="menu-row-txt"><div class="menu-row-title">Saved Addresses</div><div class="menu-row-sub">Home · Work · 3 more</div></div><span class="menu-arrow">›</span></div>
+      <div class="menu-row"><div class="menu-ic" style="background:rgba(245,166,35,0.1);">⭐</div><div class="menu-row-txt"><div class="menu-row-title">Smart Shopper</div><div class="menu-row-sub">3,240 points · Linked ✓</div></div><span class="menu-arrow">›</span></div>
+      <div class="menu-row"><div class="menu-ic" style="background:rgba(168,85,247,0.1);">🎁</div><div class="menu-row-txt"><div class="menu-row-title">Refer &amp; Earn</div><div class="menu-row-sub">Share OverBerg Go · Earn R50 per referral</div></div><span class="menu-arrow">›</span></div>
+      <div class="menu-row" onclick="nav('driver')"><div class="menu-ic" style="background:rgba(30,158,90,0.1);">🚗</div><div class="menu-row-txt"><div class="menu-row-title">Driver Dashboard</div><div class="menu-row-sub">View driver earnings & trips</div></div><span class="menu-arrow" style="color:var(--primary);">›</span></div>
+      <div class="menu-row" onclick="nav('restaurant')"><div class="menu-ic" style="background:rgba(14,158,194,0.1);">🍽️</div><div class="menu-row-txt"><div class="menu-row-title">Restaurant Dashboard</div><div class="menu-row-sub">Manage orders & menu</div></div><span class="menu-arrow" style="color:var(--sea);">›</span></div>
+      <div class="menu-row"><div class="menu-ic" style="background:rgba(255,255,255,0.06);">⚙️</div><div class="menu-row-txt"><div class="menu-row-title">Settings</div><div class="menu-row-sub">Notifications · Privacy · Help</div></div><span class="menu-arrow">›</span></div>
+      <div style="margin-top:20px;padding:16px;background:linear-gradient(135deg,rgba(30,158,90,0.08),rgba(14,158,194,0.05));border:1px solid rgba(30,158,90,0.2);border-radius:18px;text-align:center;">
+        <div style="font-size:22px;margin-bottom:8px;">🌿</div>
+        <div style="font-family:var(--h);font-weight:800;font-size:14px;color:#fff;margin-bottom:4px;">Built for the Overberg</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.5;">Struisbaai · L'Agulhas · Arniston · Bredasdorp and the wider Overberg</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ DRIVER APP ════ -->
+  <div class="screen" id="s-driver">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="driver-app-hdr" style="padding-top:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-family:var(--h);font-weight:900;font-size:20px;letter-spacing:-0.02em;">Driver <span style="color:var(--primary);">Dashboard</span></div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px;">Johan van der Berg · CA 834-GN</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-family:var(--h);font-weight:700;font-size:12px;color:var(--primary);">Online</div>
+          <div class="online-toggle on" id="driverToggle" onclick="toggleDriver()"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(30,158,90,0.08);border:1px solid rgba(30,158,90,0.2);border-radius:12px;padding:10px 14px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--primary);animation:pulse 1.5s infinite;"></div>
+        <span style="font-family:var(--h);font-weight:700;font-size:13px;">Active · Struisbaai area</span>
+        <span style="font-size:11px;color:var(--t2);margin-left:auto;">3 riders nearby</span>
+      </div>
+    </div>
+
+    <div class="earnings-row">
+      <div class="earn-card"><div class="earn-val" style="color:var(--primary);">R428</div><div class="earn-lb">Today</div></div>
+      <div class="earn-card"><div class="earn-val">12</div><div class="earn-lb">Trips</div></div>
+      <div class="earn-card"><div class="earn-val" style="color:var(--sun);">★ 4.93</div><div class="earn-lb">Rating</div></div>
+    </div>
+
+    <!-- Incoming trip request -->
+    <div style="padding:0 18px 10px;">
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--sun);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--sun);animation:pulse 1s infinite;"></div>
+        New trip request
+      </div>
+    </div>
+    <div class="trip-req">
+      <div class="req-header">
+        <div>
+          <div class="req-type">GoRide Request</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px;">3.2 km pickup · 8.1 km trip</div>
+        </div>
+        <div class="req-price">R68</div>
+      </div>
+      <div class="req-route">
+        <div class="req-point"><div class="req-dot" style="background:var(--primary);"></div>Struisbaai Harbour, Main St</div>
+        <div style="width:1.5px;height:16px;background:var(--bd2);margin-left:4px;"></div>
+        <div class="req-point"><div class="req-dot" style="background:var(--sea);"></div>Cape Agulhas Lighthouse, L'Agulhas</div>
+      </div>
+      <div class="req-actions">
+        <button class="btn-decline" onclick="showToast('Trip declined')">Decline</button>
+        <button class="btn-accept" onclick="showToast('Trip accepted! Navigate to pickup →')">Accept · R68</button>
+      </div>
+    </div>
+
+    <div class="drv-stats-row">
+      <div class="drv-stat">
+        <div class="drv-stat-title">This week</div>
+        <div class="drv-stat-val" style="color:var(--primary);">R2,840</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:4px;">47 trips · 6 days</div>
+      </div>
+      <div class="drv-stat">
+        <div class="drv-stat-title">Acceptance rate</div>
+        <div class="drv-stat-val">92%</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:4px;">Top Driver tier</div>
+      </div>
+      <div class="drv-stat">
+        <div class="drv-stat-title">Completion</div>
+        <div class="drv-stat-val">99%</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:4px;">0 cancellations</div>
+      </div>
+      <div class="drv-stat">
+        <div class="drv-stat-title">Next payout</div>
+        <div class="drv-stat-val" style="color:var(--sun);">R1,680</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:4px;">Thursday EFT</div>
+      </div>
+    </div>
+
+    <!-- Map mini -->
+    <div class="px" style="margin-bottom:14px;">
+      <div style="font-family:var(--h);font-weight:700;font-size:14px;margin-bottom:10px;">Your area</div>
+      <div style="height:120px;background:linear-gradient(160deg,#0E2A3A,#0D1F2D);border-radius:16px;position:relative;overflow:hidden;border:1px solid var(--bd);">
+        <div style="position:absolute;inset:0;opacity:0.08;">
+          <div style="position:absolute;top:33%;left:0;right:0;height:1.5px;background:rgba(30,158,90,0.7);"></div>
+          <div style="position:absolute;top:66%;left:0;right:0;height:1.5px;background:rgba(30,158,90,0.7);"></div>
+          <div style="position:absolute;left:33%;top:0;bottom:0;width:1.5px;background:rgba(30,158,90,0.5);"></div>
+          <div style="position:absolute;left:66%;top:0;bottom:0;width:1.5px;background:rgba(30,158,90,0.5);"></div>
+        </div>
+        <div style="position:absolute;top:40%;left:45%;font-size:20px;animation:carMove 6s ease-in-out infinite;">🚗</div>
+        <div style="position:absolute;bottom:10px;left:14px;background:rgba(30,158,90,0.9);border-radius:8px;padding:5px 10px;font-family:var(--h);font-weight:700;font-size:11px;">📍 You — Struisbaai Harbour</div>
+      </div>
+    </div>
+
+    <div style="padding:0 18px 100px;">
+      <button class="btn-primary" onclick="showToast('Going offline. See you next time!')">Go Offline</button>
+    </div>
+  </div>
+
+  <!-- ════ RESTAURANT APP ════ -->
+  <div class="screen" id="s-restaurant">
+    <div class="sbar"><span>09:41</span><div class="sbar-r"><div class="batt"><div class="batt-fill"></div></div></div></div>
+    <div class="rest-app-hdr" style="padding-top:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-family:var(--h);font-weight:900;font-size:20px;letter-spacing:-0.02em;">Restaurant <span style="color:var(--sea);">Dashboard</span></div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px;">Harbour Café · Struisbaai Harbour</div>
+        </div>
+        <div style="background:rgba(30,158,90,0.12);border:1px solid rgba(30,158,90,0.3);border-radius:10px;padding:6px 12px;">
+          <div style="font-family:var(--h);font-weight:700;font-size:11px;color:var(--primary);">● Open</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rest-stats">
+      <div class="rest-stat"><div class="rest-stat-val" style="color:var(--primary);">8</div><div class="rest-stat-lb">Active orders</div></div>
+      <div class="rest-stat"><div class="rest-stat-val" style="color:var(--sun);">R4,280</div><div class="rest-stat-lb">Today revenue</div></div>
+      <div class="rest-stat"><div class="rest-stat-val">★ 4.8</div><div class="rest-stat-lb">Rating</div></div>
+    </div>
+
+    <!-- New incoming order -->
+    <div style="padding:0 18px 10px;">
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;color:var(--sun);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--sun);animation:pulse 1s infinite;"></div>
+        New order incoming
+      </div>
+    </div>
+    <div class="new-order-card">
+      <div class="order-header">
+        <div><div class="order-num">Order #OBG-2847</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">Delivery · Struisbaai North</div></div>
+        <div class="order-time-badge">New · 0:32</div>
+      </div>
+      <div class="order-items-list">
+        <div class="order-item-row"><div class="oi-qty">2</div><div class="oi-name">Calamari Rings</div><div class="oi-price">R178</div></div>
+        <div class="order-item-row"><div class="oi-qty">1</div><div class="oi-name">Harbour Mezze</div><div class="oi-price">R145</div></div>
+        <div class="order-item-row"><div class="oi-qty">2</div><div class="oi-name">Coke 330ml</div><div class="oi-price">R50</div></div>
+        <div class="order-item-row" style="border-bottom:none;padding-top:10px;">
+          <div style="font-family:var(--h);font-weight:700;font-size:13px;color:var(--t2);">Total</div>
+          <div style="font-family:var(--h);font-weight:900;font-size:16px;color:#fff;margin-left:auto;">R373</div>
+        </div>
+      </div>
+      <div class="order-actions">
+        <div class="btn-reject" onclick="showToast('Order declined')">✕</div>
+        <button class="btn-ready" onclick="showToast('Order accepted! Timer started — 20 min prep')">Accept · Start 20 min timer</button>
+      </div>
+    </div>
+
+    <!-- Active orders queue -->
+    <div style="padding:0 18px 14px;">
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;margin-bottom:10px;color:#fff;">In progress (3)</div>
+      <div style="background:var(--dark2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;">
+          <div><div style="font-family:var(--h);font-weight:700;font-size:13px;">#OBG-2844</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">2x Prawn Cocktail · 1x Bisque</div></div>
+          <div style="background:rgba(14,158,194,0.12);color:var(--sea);font-family:var(--h);font-weight:700;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid rgba(14,158,194,0.25);">Preparing · 8 min</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;">
+          <div><div style="font-family:var(--h);font-weight:700;font-size:13px;">#OBG-2845</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">1x Mezze · 2x Calamari Tubes</div></div>
+          <div style="background:rgba(245,166,35,0.12);color:var(--sun);font-family:var(--h);font-weight:700;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid rgba(245,166,35,0.25);">Ready · Awaiting rider</div>
+        </div>
+        <div style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div><div style="font-family:var(--h);font-weight:700;font-size:13px;">#OBG-2846</div><div style="font-size:11px;color:var(--t2);margin-top:2px;">1x Fish Platter · 3x Drinks</div></div>
+          <div style="background:rgba(30,158,90,0.12);color:var(--primary);font-family:var(--h);font-weight:700;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid rgba(30,158,90,0.25);">On the way</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu toggle section -->
+    <div style="padding:0 18px 14px;">
+      <div style="font-family:var(--h);font-weight:800;font-size:14px;margin-bottom:12px;color:#fff;">Menu availability</div>
+    </div>
+    <div class="menu-toggle-row">
+      <div class="menu-item-toggle">
+        <div class="mit-left"><div class="mit-emoji">🍤</div><div class="mit-info"><div class="mit-name">Calamari Rings</div><div class="mit-price">R89 · Available</div></div></div>
+        <button class="mit-toggle on" onclick="toggleMenuItem(this)"><div class="mit-knob"></div></button>
+      </div>
+      <div class="menu-item-toggle">
+        <div class="mit-left"><div class="mit-emoji">🥗</div><div class="mit-info"><div class="mit-name">Prawn Cocktail</div><div class="mit-price">R110 · Available</div></div></div>
+        <button class="mit-toggle on" onclick="toggleMenuItem(this)"><div class="mit-knob"></div></button>
+      </div>
+      <div class="menu-item-toggle">
+        <div class="mit-left"><div class="mit-emoji">🦞</div><div class="mit-info"><div class="mit-name">Crayfish Platter</div><div class="mit-price" style="color:var(--coral);">Sold out · 86'd</div></div></div>
+        <button class="mit-toggle off" onclick="toggleMenuItem(this)"><div class="mit-knob"></div></button>
+      </div>
+      <div class="menu-item-toggle">
+        <div class="mit-left"><div class="mit-emoji">🍜</div><div class="mit-info"><div class="mit-name">Crayfish Bisque</div><div class="mit-price">R78 · Available</div></div></div>
+        <button class="mit-toggle on" onclick="toggleMenuItem(this)"><div class="mit-knob"></div></button>
+      </div>
+      <div class="menu-item-toggle">
+        <div class="mit-left"><div class="mit-emoji">🥩</div><div class="mit-info"><div class="mit-name">Harbour Mezze</div><div class="mit-price">R145 · Available</div></div></div>
+        <button class="mit-toggle on" onclick="toggleMenuItem(this)"><div class="mit-knob"></div></button>
+      </div>
+    </div>
+
+    <div style="padding:0 18px 100px;">
+      <button class="btn-primary" onclick="showToast('Settings saved. All changes live!')">Save & Publish Menu</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav" id="mainBnav">
+    <div class="bn on" id="bn-home" onclick="nav('home')"><div class="bn-bar"></div><div class="bn-ic">🏠</div><div class="bn-lb">Home</div></div>
+    <div class="bn" id="bn-food" onclick="nav('food')"><div class="bn-ic">🍽️</div><div class="bn-lb">Food</div></div>
+    <div class="bn" id="bn-exp" onclick="nav('exp')"><div class="bn-ic">⚓</div><div class="bn-lb">Explore</div></div>
+    <div class="bn" id="bn-orders" onclick="nav('orders')"><div class="bn-ic" style="position:relative;">📦<div class="bn-dot"></div></div><div class="bn-lb">Orders</div></div>
+    <div class="bn" id="bn-me" onclick="nav('me')"><div class="bn-ic">👤</div><div class="bn-lb">Me</div></div>
+  </div>
+
+  <!-- CART TOAST -->
+  <div class="cart-toast" id="cartToast">
+    <div class="cart-toast-info" id="toastMsg">🛒 Item added to cart</div>
+    <div class="cart-toast-count" id="toastCount">1</div>
+  </div>
+
+</div><!-- /device -->
+
+<script>
+let cartItems=0,cartValue=0,pnpItems=0;
+const prices=[89,110,95,78,145];
+let priceIdx=0;
+let driverOnline=true;
+
+setTimeout(()=>{
+  document.getElementById('splash').classList.add('gone');
+},2200);
+
+const navMap={
+  'home':'s-home','food':'s-food','pnp':'s-pnp','ride':'s-ride',
+  'exp':'s-exp','stays':'s-stays','orders':'s-orders','me':'s-me',
+  'menu':'s-menu','driver':'s-driver','restaurant':'s-restaurant'
+};
+const bnIds=['home','food','exp','orders','me'];
+
+function nav(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active','prev'));
+  document.querySelectorAll('.bn').forEach(b=>{b.classList.remove('on');b.querySelectorAll('.bn-bar').forEach(x=>x.remove());});
+  const scr=navMap[id];
+  if(scr) document.getElementById(scr).classList.add('active');
+  const bn=document.getElementById('bn-'+id);
+  if(bn){
+    bn.classList.add('on');
+    if(!bn.querySelector('.bn-bar')){const bar=document.createElement('div');bar.className='bn-bar';bn.insertBefore(bar,bn.firstChild);}
+  }
+}
+
+function goFood(){nav('food');}
+function goPnP(){nav('pnp');}
+function goExperiences(){nav('exp');}
+function goStays(){nav('stays');}
+function goRide(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active','prev'));
+  document.querySelectorAll('.bn').forEach(b=>{b.classList.remove('on');b.querySelectorAll('.bn-bar').forEach(x=>x.remove());});
+  document.getElementById('s-ride').classList.add('active');
+}
+
+const restaurants=[
+  {name:'Harbour Café',bg:'linear-gradient(160deg,#0a1e2a,#061420)',emoji:'🦐',rating:'4.8 (312)',time:'20 min',delivery:'R35'},
+  {name:'Michael Collins',bg:'linear-gradient(160deg,#1a0d05,#0d0800)',emoji:'🍺',rating:'4.5 (187)',time:'25 min',delivery:'R35'},
+  {name:'Fish & More',bg:'linear-gradient(160deg,#061e1a,#031510)',emoji:'🐟',rating:'4.7 (243)',time:'15 min',delivery:'R25'},
+  {name:"Gavin's Trattoria",bg:'linear-gradient(160deg,#1a1005,#100a00)',emoji:'🍕',rating:'4.6 (156)',time:'30 min',delivery:'R38'},
+];
+
+function openMenu(idx){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active','prev'));
+  const r=restaurants[idx]||restaurants[0];
+  const bg=document.getElementById('menuHeroBg');
+  bg.style.background=r.bg;
+  bg.innerHTML=r.emoji;
+  bg.style.fontSize='80px';
+  bg.style.display='flex';bg.style.alignItems='center';bg.style.justifyContent='center';
+  document.getElementById('menuName').textContent=r.name;
+  document.getElementById('s-menu').classList.add('active');
+  if(cartItems===0)document.getElementById('cartBar').style.display='none';
+  else document.getElementById('cartBar').style.display='flex';
+}
+
+function showFood(){nav('food');}
+
+function switchCat(el){
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function addToCart(){
+  cartItems++;
+  const p=prices[priceIdx%prices.length];priceIdx++;
+  cartValue+=p;
+  document.getElementById('cartCount').textContent=cartItems+(cartItems===1?' item':' items');
+  document.getElementById('cartTotal').textContent='R'+cartValue;
+  document.getElementById('cartBar').style.display='flex';
+  showToast('R'+p+' added to cart');
+}
+
+function addPnP(){
+  pnpItems++;
+  showToast('Added to PnP basket');
+}
+
+function showToast(msg){
+  const t=document.getElementById('cartToast');
+  document.getElementById('toastMsg').textContent='✓ '+msg;
+  document.getElementById('toastCount').textContent=cartItems+pnpItems;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function selectRide(el){
+  document.querySelectorAll('.ride-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const price=el.querySelector('.ride-p').textContent;
+  const name=el.querySelector('.ride-n').textContent;
+  document.querySelector('#s-ride .btn-primary').textContent='Book '+name+' · '+price;
+}
+
+function openArea(){
+  const m=document.getElementById('areaModal');
+  m.style.display='flex';
+  setTimeout(()=>m.classList.add('open'),10);
+}
+
+function selectArea(name){
+  document.getElementById('currentArea').textContent=name;
+  document.querySelectorAll('.area-item').forEach(i=>i.classList.remove('sel'));
+  event.currentTarget.classList.add('sel');
+  closeArea();
+}
+
+function closeArea(){
+  const m=document.getElementById('areaModal');
+  m.classList.remove('open');
+  setTimeout(()=>m.style.display='none',350);
+}
+
+document.getElementById('areaModal').addEventListener('click',function(e){
+  if(e.target===this)closeArea();
+});
+
+function toggleDriver(){
+  driverOnline=!driverOnline;
+  const toggle=document.getElementById('driverToggle');
+  if(driverOnline){
+    toggle.classList.add('on');
+    showToast('You are now online');
+  } else {
+    toggle.classList.remove('on');
+    showToast('Going offline...');
+  }
+}
+
+function toggleMenuItem(btn){
+  const isOn=btn.classList.contains('on');
+  if(isOn){
+    btn.classList.remove('on');btn.classList.add('off');
+    const priceEl=btn.closest('.menu-item-toggle').querySelector('.mit-price');
+    if(priceEl)priceEl.style.color='var(--coral)';
+    const nameEl=btn.closest('.menu-item-toggle').querySelector('.mit-name');
+    showToast(nameEl.textContent+' marked as sold out');
+  } else {
+    btn.classList.remove('off');btn.classList.add('on');
+    const priceEl=btn.closest('.menu-item-toggle').querySelector('.mit-price');
+    if(priceEl)priceEl.style.color='var(--t2)';
+    const nameEl=btn.closest('.menu-item-toggle').querySelector('.mit-name');
+    showToast(nameEl.textContent+' marked as available');
+  }
+}
+</script>
+</body>
+</html>
