@@ -76,14 +76,14 @@ export default function ProfilePage() {
         </Link>
 
         {/* Settings */}
-        <div className="flex items-center gap-3 bg-dark2 border border-bd rounded-[16px] p-4">
+        <Link href="/settings" className="flex items-center gap-3 bg-dark2 border border-bd rounded-[16px] p-4">
           <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-lg bg-white/[0.06]">⚙️</div>
           <div className="flex-1">
             <div className="font-heading font-bold text-sm">Settings</div>
             <div className="text-[11px] text-t2 mt-0.5">Notifications · Privacy · Help</div>
           </div>
           <span className="text-t3 text-lg">›</span>
-        </div>
+        </Link>
 
         {/* Footer */}
         <div className="mt-5 p-4 bg-gradient-to-br from-primary/[0.08] to-sea/[0.05] border border-primary/20 rounded-[18px] text-center">

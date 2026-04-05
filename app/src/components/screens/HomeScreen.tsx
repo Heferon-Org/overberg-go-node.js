@@ -32,13 +32,13 @@ export function HomeScreen() {
       <div className="flex items-center justify-between px-[18px] pt-3">
         <AreaSelector />
         <div className="flex gap-2">
-          <div className="w-10 h-10 rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-lg relative">
+          <Link href="/notifications" className="w-10 h-10 rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-lg relative">
             🔔
             <span className="absolute top-[9px] right-[9px] w-[7px] h-[7px] bg-coral rounded-full border-[1.5px] border-dark" />
-          </div>
-          <div className="w-10 h-10 rounded-[14px] bg-primary flex items-center justify-center font-heading font-black text-base">
+          </Link>
+          <Link href="/profile" className="w-10 h-10 rounded-[14px] bg-primary flex items-center justify-center font-heading font-black text-base">
             E
-          </div>
+          </Link>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { Toast } from "@/components/Toast";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
+import { SplashScreen } from "@/components/SplashScreen";
 
 export const metadata: Metadata = {
   title: "OverBerg Go",
@@ -42,6 +43,7 @@ export default function RootLayout({
         {children}
         <BottomNav />
         <Toast />
+        <SplashScreen />
         <ServiceWorkerRegistrar />
       </body>
     </html>

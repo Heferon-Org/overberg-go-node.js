@@ -29,7 +29,7 @@ export default function CartPage() {
         </p>
         <p className="text-t3 text-xs mb-8">Estimated delivery: 20–30 min</p>
         <Link
-          href="/orders"
+          href="/orders/tracking"
           className="w-full bg-primary text-white font-heading font-extrabold text-base rounded-2xl py-4 text-center block mb-3 active:bg-primary-dark transition-colors"
         >
           Track Order

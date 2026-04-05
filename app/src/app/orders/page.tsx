@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const activeOrder = {
   restaurant: "Harbour Café",
   items: "Calamari Rings · Prawn Cocktail · 1x Coke",
@@ -68,7 +70,7 @@ export default function OrdersPage() {
           <div className="font-heading font-bold text-sm text-t2">
             {activeOrder.total} · ETA {activeOrder.eta}
           </div>
-          <span className="font-heading font-bold text-xs text-primary">Track →</span>
+          <Link href="/orders/tracking" className="font-heading font-bold text-xs text-primary">Track →</Link>
         </div>
       </div>
 
