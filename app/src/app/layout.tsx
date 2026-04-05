@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Toast } from "@/components/Toast";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { SplashScreen } from "@/components/SplashScreen";
+import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "OverBerg Go",
@@ -40,11 +41,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-dvh bg-dark text-white font-body pb-20">
-        {children}
-        <BottomNav />
-        <Toast />
-        <SplashScreen />
-        <ServiceWorkerRegistrar />
+        <Providers>
+          {children}
+          <BottomNav />
+          <Toast />
+          <SplashScreen />
+          <ServiceWorkerRegistrar />
+        </Providers>
       </body>
     </html>
   );
