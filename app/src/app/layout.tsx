@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { Toast } from "@/components/Toast";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 
 export const metadata: Metadata = {
   title: "OverBerg Go",
@@ -41,6 +42,7 @@ export default function RootLayout({
         {children}
         <BottomNav />
         <Toast />
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

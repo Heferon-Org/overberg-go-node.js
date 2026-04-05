@@ -101,7 +101,10 @@ export default function MenuPage({ params }: { params: Promise<{ id: string }> }
 
       {/* Cart bar */}
       {cartCount() > 0 && (
-        <div className="fixed bottom-20 left-4 right-4 bg-primary rounded-2xl p-4 flex items-center justify-between z-40 shadow-lg shadow-primary/20">
+        <Link
+          href="/cart"
+          className="fixed bottom-20 left-4 right-4 bg-primary rounded-2xl p-4 flex items-center justify-between z-40 shadow-lg shadow-primary/20"
+        >
           <div>
             <div className="font-heading font-extrabold text-white text-[15px]">View Order</div>
             <div className="text-xs text-white/75">
@@ -109,7 +112,7 @@ export default function MenuPage({ params }: { params: Promise<{ id: string }> }
             </div>
           </div>
           <div className="font-heading font-black text-white text-[17px]">R{cartTotal()}</div>
-        </div>
+        </Link>
       )}
     </div>
   );
