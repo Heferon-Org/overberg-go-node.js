@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* OverBerg Go Design Tokens */
+  --color-primary: #1E9E5A;
+  --color-primary-dark: #167042;
+  --color-primary-light: #B3EACF;
+  --color-sea: #0E9EC2;
+  --color-sea-dark: #0A7A99;
+  --color-sea-light: #B8E8F5;
+  --color-sand: #F2EFE6;
+  --color-sand-dark: #D9D3C0;
+  --color-sun: #F5A623;
+  --color-coral: #E8503A;
+  --color-dark: #0D1F2D;
+  --color-dark2: #102332;
+  --color-dark3: #162C3A;
+  --color-dark4: #1E3547;
+  --color-surf: #243C50;
+  --color-t1: #FFFFFF;
+  --color-t2: rgba(255, 255, 255, 0.62);
+  --color-t3: rgba(255, 255, 255, 0.35);
+  --color-bd: rgba(255, 255, 255, 0.08);
+  --color-bd2: rgba(255, 255, 255, 0.15);
+
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  background: #06121C;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(30, 158, 90, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(14, 158, 194, 0.07) 0%, transparent 45%),
+    #06121C;
+  font-family: var(--font-body);
+}
+
+/* Scrollbar hide */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-pulse-live {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Car animation */
+@keyframes carMove {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(15px, -8px); }
+  50% { transform: translate(30px, 5px); }
+  75% { transform: translate(10px, 12px); }
+}
+.animate-car {
+  animation: carMove 6s ease-in-out infinite;
+}

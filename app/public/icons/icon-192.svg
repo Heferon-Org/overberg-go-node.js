@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="40" fill="#0D1F2D"/>
+  <circle cx="96" cy="80" r="36" fill="#1E9E5A" opacity="0.15"/>
+  <text x="96" y="100" text-anchor="middle" font-size="64" font-family="sans-serif" font-weight="900" fill="#1E9E5A">OG</text>
+  <text x="96" y="140" text-anchor="middle" font-size="18" font-family="sans-serif" font-weight="700" fill="white" opacity="0.6">overberg</text>
+</svg>
