@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useToastStore } from "@/lib/store";
+import { useToastStore, useAddressStore } from "@/lib/store";
+import { ScheduleModal } from "@/components/ScheduleModal";
 
 const rideTypes = [
   { name: "GoRide", emoji: "🚗", price: 55, eta: "4 min · 1-3 pax" },
@@ -22,7 +23,11 @@ const quickPlaces = [
 export default function RidePage() {
   const [selected, setSelected] = useState(0);
   const showToast = useToastStore((s) => s.show);
+  const defaultAddress = useAddressStore((s) => s.getDefault);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [scheduledTime, setScheduledTime] = useState<{ date: string; time: string } | null>(null);
   const ride = rideTypes[selected];
+  const addr = defaultAddress();
 
   return (
     <div>
@@ -61,7 +66,7 @@ export default function RidePage() {
       <div className="mx-[18px] bg-dark2 border border-bd rounded-[18px] p-4 mb-3">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-primary" />
-          <div className="font-heading font-semibold text-sm text-t1">Marine 127, Struisbaai</div>
+          <div className="font-heading font-semibold text-sm text-t1">{addr?.address || "Marine 127, Struisbaai"}</div>
         </div>
         <div className="w-[1.5px] h-4 bg-bd2 ml-[5px] my-1" />
         <div className="flex items-center gap-3">
@@ -114,18 +119,49 @@ export default function RidePage() {
         </div>
         <div className="flex gap-2">
           <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center">📞</div>
-          <div className="w-10 h-10 rounded-xl bg-sea/10 border border-sea/25 flex items-center justify-center">💬</div>
+          <Link href="/chat" className="w-10 h-10 rounded-xl bg-sea/10 border border-sea/25 flex items-center justify-center">💬</Link>
         </div>
+      </div>
+
+      {/* Schedule */}
+      <div className="mx-[18px] bg-dark2 border border-bd rounded-[18px] p-3.5 flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">📅</span>
+          <span className="font-heading font-bold text-xs">
+            {scheduledTime ? `${scheduledTime.date} at ${scheduledTime.time}` : "Now — ride ASAP"}
+          </span>
+        </div>
+        <button
+          onClick={() => setShowSchedule(true)}
+          className="text-primary font-heading font-bold text-xs"
+        >
+          {scheduledTime ? "Change" : "Schedule"}
+        </button>
       </div>
 
       <div className="px-[18px] pb-24">
         <button
-          onClick={() => showToast(`✓ Booking ${ride.name} — Driver Sipho is 3 min away`)}
+          onClick={() => showToast(
+            scheduledTime
+              ? `✓ ${ride.name} scheduled for ${scheduledTime.date} at ${scheduledTime.time}`
+              : `✓ Booking ${ride.name} — Driver Sipho is 3 min away`
+          )}
           className="w-full bg-primary text-white font-heading font-extrabold text-base rounded-2xl py-[17px] active:bg-primary-dark active:scale-[0.98] transition-all"
         >
-          Book {ride.name} · R{ride.price}
+          {scheduledTime ? `Schedule ${ride.name}` : `Book ${ride.name}`} · R{ride.price}
         </button>
       </div>
+
+      <ScheduleModal
+        open={showSchedule}
+        onClose={() => setShowSchedule(false)}
+        title="Schedule Ride"
+        onConfirm={(date, time) => {
+          setScheduledTime({ date, time });
+          setShowSchedule(false);
+          showToast(`✓ Ride scheduled for ${date} at ${time}`);
+        }}
+      />
     </div>
   );
 }

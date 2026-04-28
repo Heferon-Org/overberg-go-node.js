@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { RatingModal } from "@/components/RatingModal";
 
 const steps = [
   { label: "Placed", icon: "✓", time: "09:41" },
@@ -14,8 +15,8 @@ const steps = [
 export default function TrackingPage() {
   const [currentStep, setCurrentStep] = useState(2);
   const [etaMinutes, setEtaMinutes] = useState(18);
+  const [showRating, setShowRating] = useState(false);
 
-  // Simulate order progress
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentStep((prev) => {
@@ -29,6 +30,13 @@ export default function TrackingPage() {
   }, []);
 
   const isDelivered = currentStep >= steps.length - 1;
+
+  useEffect(() => {
+    if (isDelivered) {
+      const timer = setTimeout(() => setShowRating(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isDelivered]);
 
   return (
     <div className="pb-24">
@@ -46,7 +54,7 @@ export default function TrackingPage() {
         </div>
         <div className="flex gap-2">
           <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center">📞</div>
-          <div className="w-10 h-10 rounded-xl bg-sea/10 border border-sea/25 flex items-center justify-center">💬</div>
+          <Link href="/chat" className="w-10 h-10 rounded-xl bg-sea/10 border border-sea/25 flex items-center justify-center">💬</Link>
         </div>
       </div>
 
@@ -61,7 +69,6 @@ export default function TrackingPage() {
           <div className="absolute left-3/4 top-0 bottom-0 w-px bg-primary" />
         </div>
 
-        {/* Restaurant pin */}
         <div className="absolute top-[25%] left-[30%] flex flex-col items-center">
           <div className="w-3 h-3 rounded-full bg-sea border-2 border-white shadow-lg" />
           <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[8px] font-heading font-bold whitespace-nowrap">
@@ -69,7 +76,6 @@ export default function TrackingPage() {
           </div>
         </div>
 
-        {/* Delivery pin */}
         <div className="absolute top-[65%] left-[70%] flex flex-col items-center">
           <div className="w-3 h-3 rounded-full bg-primary border-2 border-white shadow-lg" />
           <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[8px] font-heading font-bold whitespace-nowrap">
@@ -77,12 +83,10 @@ export default function TrackingPage() {
           </div>
         </div>
 
-        {/* Rider */}
         {currentStep >= 3 && !isDelivered && (
           <div className="absolute top-[45%] left-[50%] text-2xl animate-car">🛵</div>
         )}
 
-        {/* ETA badge */}
         <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur rounded-xl px-3.5 py-2">
           <div className="font-heading font-extrabold text-[15px] text-white">
             {isDelivered ? "Delivered!" : `${etaMinutes} min`}
@@ -112,7 +116,6 @@ export default function TrackingPage() {
           </span>
         </div>
 
-        {/* Progress steps */}
         <div className="space-y-0">
           {steps.map((step, i) => (
             <div key={step.label} className="flex items-start gap-3">
@@ -169,7 +172,7 @@ export default function TrackingPage() {
           </div>
           <div className="flex gap-2">
             <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center">📞</div>
-            <div className="w-10 h-10 rounded-xl bg-sea/10 border border-sea/25 flex items-center justify-center">💬</div>
+            <Link href="/chat" className="w-10 h-10 rounded-xl bg-sea/10 border border-sea/25 flex items-center justify-center">💬</Link>
           </div>
         </div>
       )}
@@ -196,6 +199,13 @@ export default function TrackingPage() {
           </div>
         </div>
       </div>
+
+      <RatingModal
+        open={showRating}
+        onClose={() => setShowRating(false)}
+        restaurantName="Harbour Café"
+        driverName="Sipho"
+      />
     </div>
   );
 }

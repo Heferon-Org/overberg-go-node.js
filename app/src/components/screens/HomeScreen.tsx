@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AreaSelector } from "@/components/AreaSelector";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { restaurants } from "@/lib/data";
+import { useWalletStore, useLoyaltyStore } from "@/lib/store";
 
 const services = [
   { label: "Food", emoji: "🍽️", href: "/food", bg: "rgba(232,80,58,0.12)", border: "rgba(232,80,58,0.25)" },
@@ -13,7 +14,7 @@ const services = [
   { label: "Guest Houses", emoji: "🏡", href: "/stays", bg: "rgba(30,158,90,0.12)", border: "rgba(30,158,90,0.2)" },
   { label: "Dog Walker", emoji: "🐕", href: "/explore", bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.2)" },
   { label: "Fresh Fish", emoji: "🐟", href: "/explore", bg: "rgba(14,122,153,0.15)", border: "rgba(14,158,194,0.25)" },
-  { label: "More", emoji: "···", href: "/explore", bg: "var(--color-dark3)", border: "var(--color-bd2)" },
+  { label: "Services", emoji: "🔧", href: "/services", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.25)" },
 ];
 
 const promos = [
@@ -24,6 +25,9 @@ const promos = [
 ];
 
 export function HomeScreen() {
+  const walletBalance = useWalletStore((s) => s.balance);
+  const { tier, points } = useLoyaltyStore();
+  const tierEmoji = tier === "Bronze" ? "🥉" : tier === "Silver" ? "🥈" : tier === "Gold" ? "🥇" : "💎";
   const popularRestaurants = restaurants.filter((r) => !r.closed).slice(0, 2);
 
   return (
@@ -31,7 +35,11 @@ export function HomeScreen() {
       {/* Location row */}
       <div className="flex items-center justify-between px-[18px] pt-3">
         <AreaSelector />
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <Link href="/wallet" className="bg-primary/10 border border-primary/25 rounded-full px-3 py-1.5 flex items-center gap-1">
+            <span className="text-xs">💰</span>
+            <span className="font-heading font-bold text-[11px] text-primary">R{walletBalance}</span>
+          </Link>
           <Link href="/notifications" className="w-10 h-10 rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-lg relative">
             🔔
             <span className="absolute top-[9px] right-[9px] w-[7px] h-[7px] bg-coral rounded-full border-[1.5px] border-white" />
@@ -50,7 +58,7 @@ export function HomeScreen() {
           <span className="text-t2 font-semibold text-[19px]">What do you need?</span>
         </h1>
         <Link
-          href="/food"
+          href="/search"
           className="flex items-center gap-2.5 bg-dark3 border-[1.5px] border-bd rounded-[14px] px-4 py-3.5"
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(17,24,39,0.3)" strokeWidth="2">
@@ -71,6 +79,17 @@ export function HomeScreen() {
           Live
         </div>
       </div>
+
+      {/* Loyalty */}
+      <Link href="/loyalty" className="block mx-[18px] mb-4">
+        <div className="flex items-center gap-2.5 bg-dark2 border border-bd rounded-[14px] p-3 px-3.5">
+          <span className="text-lg">{tierEmoji}</span>
+          <span className="font-heading font-bold text-[12px]">{tier}</span>
+          <span className="text-[11px] text-t2">·</span>
+          <span className="text-[11px] text-primary font-heading font-bold">{points.toLocaleString()} pts</span>
+          <span className="ml-auto text-primary text-xs font-heading font-bold">View →</span>
+        </div>
+      </Link>
 
       {/* Services */}
       <div className="px-[18px] pb-4">
@@ -106,7 +125,7 @@ export function HomeScreen() {
       <div className="mb-4">
         <div className="px-[18px] flex items-center justify-between mb-3">
           <h2 className="font-heading font-black text-base">Deals for you</h2>
-          <span className="font-heading font-semibold text-xs text-primary">See all</span>
+          <Link href="/promos" className="font-heading font-semibold text-xs text-primary">See all</Link>
         </div>
         <div className="flex gap-3 overflow-x-auto px-[18px] pb-1 no-scrollbar">
           {promos.map((p) => (

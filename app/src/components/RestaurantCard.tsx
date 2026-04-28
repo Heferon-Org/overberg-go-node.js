@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import type { Restaurant } from "@/lib/data";
+import { useFavoritesStore } from "@/lib/store";
 
 export function RestaurantCard({ r }: { r: Restaurant }) {
+  const isFav = useFavoritesStore((s) => s.isRestaurantFav(r.id));
+  const toggleFav = useFavoritesStore((s) => s.toggleRestaurant);
+
   const content = (
     <div
       className={`bg-dark2 border border-bd rounded-[18px] overflow-hidden shadow-sm transition-all active:scale-[0.99] ${
@@ -30,6 +36,18 @@ export function RestaurantCard({ r }: { r: Restaurant }) {
         <div className="absolute top-2.5 left-2.5 bg-black/60 backdrop-blur-lg border border-white/10 rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white/90">
           {r.tag}
         </div>
+        {!r.closed && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleFav(r.id);
+            }}
+            className="absolute bottom-2.5 right-2.5 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-sm shadow-sm active:scale-90 transition-transform"
+          >
+            {isFav ? "❤️" : "🤍"}
+          </button>
+        )}
       </div>
       <div className="p-3 pb-3.5">
         <div className="font-heading font-bold text-sm text-t1">{r.name}</div>
