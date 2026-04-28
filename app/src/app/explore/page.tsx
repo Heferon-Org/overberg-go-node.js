@@ -59,7 +59,7 @@ export default function ExplorePage() {
               {sectionExps.map((exp) => (
                 <div
                   key={exp.id}
-                  className="bg-dark2 border border-bd rounded-[18px] overflow-hidden mb-3"
+                  className="bg-dark2 border border-bd rounded-[18px] overflow-hidden mb-3 shadow-sm"
                 >
                   <div
                     className="h-[100px] relative flex items-center justify-center text-[44px]"

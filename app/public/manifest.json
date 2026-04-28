@@ -4,7 +4,7 @@
   "description": "Food, rides, experiences & more in the Overberg region",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#06121C",
+  "background_color": "#FFFFFF",
   "theme_color": "#1E9E5A",
   "orientation": "portrait",
   "icons": [

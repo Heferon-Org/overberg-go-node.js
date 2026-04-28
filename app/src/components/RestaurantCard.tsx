@@ -4,7 +4,7 @@ import type { Restaurant } from "@/lib/data";
 export function RestaurantCard({ r }: { r: Restaurant }) {
   const content = (
     <div
-      className={`bg-dark2 border border-bd rounded-[18px] overflow-hidden transition-all active:scale-[0.99] ${
+      className={`bg-dark2 border border-bd rounded-[18px] overflow-hidden shadow-sm transition-all active:scale-[0.99] ${
         r.closed ? "opacity-60" : ""
       }`}
     >
@@ -15,7 +15,7 @@ export function RestaurantCard({ r }: { r: Restaurant }) {
         >
           {r.emoji}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,22,32,0.88)] via-[rgba(10,22,32,0.1)] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.55)] via-[rgba(0,0,0,0.05)] to-transparent" />
         {r.closed && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-5">
             <div className="bg-black/80 text-white/70 font-bold text-[11px] px-4 py-1.5 rounded-full border border-white/15">
@@ -32,17 +32,17 @@ export function RestaurantCard({ r }: { r: Restaurant }) {
         </div>
       </div>
       <div className="p-3 pb-3.5">
-        <div className="font-heading font-bold text-sm text-white">{r.name}</div>
+        <div className="font-heading font-bold text-sm text-t1">{r.name}</div>
         {r.subtitle && (
           <div className="text-[11px] text-t2 mt-1 leading-relaxed">{r.subtitle}</div>
         )}
         <div className="flex items-center gap-1.5 text-[11px] text-t2 mt-1.5">
           <span>🕐 {r.time}</span>
-          <span className="w-[3px] h-[3px] rounded-full bg-white/20" />
+          <span className="w-[3px] h-[3px] rounded-full bg-black/15" />
           <span>{r.deliveryFee} delivery</span>
           {r.location && (
             <>
-              <span className="w-[3px] h-[3px] rounded-full bg-white/20" />
+              <span className="w-[3px] h-[3px] rounded-full bg-black/15" />
               <span>{r.location}</span>
             </>
           )}

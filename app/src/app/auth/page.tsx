@@ -116,7 +116,7 @@ function AuthPageInner() {
       </div>
 
       {/* Auth form */}
-      <div className="bg-dark2 border-t border-bd rounded-t-3xl px-6 pt-6 pb-10">
+      <div className="bg-dark2 border-t border-bd rounded-t-3xl px-6 pt-6 pb-10 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
         {/* Tabs */}
         <div className="flex bg-dark3 rounded-2xl p-1 mb-6">
           <button
@@ -150,7 +150,7 @@ function AuthPageInner() {
                 placeholder="82 123 4567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="bg-transparent flex-1 text-white text-sm outline-none placeholder:text-t3"
+                className="bg-transparent flex-1 text-t1 text-sm outline-none placeholder:text-t3"
               />
             </div>
 
@@ -164,7 +164,7 @@ function AuthPageInner() {
                   placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-dark3 border border-bd rounded-xl px-3 py-3 text-sm text-white placeholder:text-t3 outline-none focus:border-primary/40 transition-colors mb-4"
+                  className="w-full bg-dark3 border border-bd rounded-xl px-3 py-3 text-sm text-t1 placeholder:text-t3 outline-none focus:border-primary/40 transition-colors mb-4"
                 />
               </>
             )}
@@ -212,7 +212,7 @@ function AuthPageInner() {
                   key={i}
                   type="text"
                   maxLength={1}
-                  className="w-14 h-14 bg-dark3 border border-bd rounded-xl text-center text-xl font-heading font-black text-white outline-none focus:border-primary/50 transition-colors"
+                  className="w-14 h-14 bg-dark3 border border-bd rounded-xl text-center text-xl font-heading font-black text-t1 outline-none focus:border-primary/50 transition-colors"
                   value={otp[i] || ""}
                   onChange={(e) => {
                     const val = e.target.value;

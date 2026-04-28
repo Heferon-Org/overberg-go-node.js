@@ -77,7 +77,7 @@ export default function ProfilePage() {
 
         {/* Settings */}
         <Link href="/settings" className="flex items-center gap-3 bg-dark2 border border-bd rounded-[16px] p-4">
-          <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-lg bg-white/[0.06]">⚙️</div>
+          <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-lg bg-black/[0.04]">⚙️</div>
           <div className="flex-1">
             <div className="font-heading font-bold text-sm">Settings</div>
             <div className="text-[11px] text-t2 mt-0.5">Notifications · Privacy · Help</div>

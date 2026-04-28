@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "OverBerg Go",
   },
 };
@@ -40,7 +40,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-dvh bg-dark text-white font-body pb-20">
+      <body className="min-h-dvh bg-white text-t1 font-body pb-20">
         <Providers>
           {children}
           <BottomNav />

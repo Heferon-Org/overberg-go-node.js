@@ -59,7 +59,7 @@ export default function SettingsPage() {
                 <button
                   key={item.label}
                   onClick={() => showToast(`${item.label} — coming soon`)}
-                  className={`w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-white/[0.02] transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-black/[0.03] transition-colors ${
                     i < section.items.length - 1 ? "border-b border-bd" : ""
                   }`}
                 >

@@ -6,8 +6,8 @@ import { useToastStore } from "@/lib/store";
 
 const weekStats = [
   { title: "This week", value: "R2,840", color: "text-primary", sub: "47 trips · 6 days" },
-  { title: "Acceptance rate", value: "92%", color: "text-white", sub: "Top Driver tier" },
-  { title: "Completion", value: "99%", color: "text-white", sub: "0 cancellations" },
+  { title: "Acceptance rate", value: "92%", color: "text-t1", sub: "Top Driver tier" },
+  { title: "Completion", value: "99%", color: "text-t1", sub: "0 cancellations" },
   { title: "Next payout", value: "R1,680", color: "text-sun", sub: "Thursday EFT" },
 ];
 
@@ -131,7 +131,7 @@ export default function DriverPage() {
       {/* Mini map */}
       <div className="px-[18px] mb-4">
         <div className="font-heading font-bold text-sm mb-2.5">Your area</div>
-        <div className="h-[120px] bg-gradient-to-br from-[#0E2A3A] to-dark rounded-[16px] relative overflow-hidden border border-bd">
+        <div className="h-[120px] bg-gradient-to-br from-[#e8f4f8] to-[#f0f7fa] rounded-[16px] relative overflow-hidden border border-bd">
           <div className="absolute inset-0 opacity-[0.08]">
             <div className="absolute top-1/3 left-0 right-0 h-[1.5px] bg-primary/70" />
             <div className="absolute top-2/3 left-0 right-0 h-[1.5px] bg-primary/70" />

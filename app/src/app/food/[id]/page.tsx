@@ -27,11 +27,11 @@ export default function MenuPage({ params }: { params: Promise<{ id: string }> }
         >
           {restaurant.emoji}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute top-12 left-[18px] z-5">
           <Link
             href="/food"
-            className="w-10 h-10 rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-lg"
+            className="w-10 h-10 rounded-[14px] bg-white/90 backdrop-blur border border-black/10 flex items-center justify-center text-lg"
           >
             ←
           </Link>
@@ -40,9 +40,9 @@ export default function MenuPage({ params }: { params: Promise<{ id: string }> }
           <h1 className="font-heading font-black text-[22px] tracking-tight">{restaurant.name}</h1>
           <div className="flex items-center gap-2 text-xs text-t2 mt-1">
             <span>★ {restaurant.rating} ({restaurant.reviews})</span>
-            <span className="w-[3px] h-[3px] rounded-full bg-white/20" />
+            <span className="w-[3px] h-[3px] rounded-full bg-white/40" />
             <span>🕐 {restaurant.time}</span>
-            <span className="w-[3px] h-[3px] rounded-full bg-white/20" />
+            <span className="w-[3px] h-[3px] rounded-full bg-white/40" />
             <span>{restaurant.deliveryFee} delivery</span>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function MenuPage({ params }: { params: Promise<{ id: string }> }
               });
               showToast(`✓ R${item.price} added to cart`);
             }}
-            className="w-full flex items-center gap-3 px-[18px] py-3.5 border-b border-bd text-left active:bg-white/[0.03] transition-colors"
+            className="w-full flex items-center gap-3 px-[18px] py-3.5 border-b border-bd text-left active:bg-black/[0.03] transition-colors"
           >
             <div className="w-[52px] h-[52px] rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-2xl shrink-0">
               {item.emoji}

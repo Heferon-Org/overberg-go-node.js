@@ -17,10 +17,10 @@ const services = [
 ];
 
 const promos = [
-  { code: "SEA20", emoji: "⚓", title: "Go to Sea", desc: "20% off boat experiences", bg: "linear-gradient(135deg,#061a0f,#0a2e1a)", border: "rgba(30,158,90,0.3)", codeBg: "rgba(30,158,90,0.2)", codeColor: "#1E9E5A" },
-  { code: "FRESHFISH", emoji: "🐟", title: "Catch of the Day", desc: "R30 off fresh fish delivery", bg: "linear-gradient(135deg,#072530,#0a2e3d)", border: "rgba(14,158,194,0.3)", codeBg: "rgba(14,158,194,0.2)", codeColor: "#0E9EC2" },
-  { code: "PNPSAVE", emoji: "🛒", title: "PnP Smart Deal", desc: "R50 off grocery orders R300+", bg: "linear-gradient(135deg,#200d0d,#2d1010)", border: "rgba(204,31,26,0.3)", codeBg: "rgba(204,31,26,0.2)", codeColor: "#e84040" },
-  { code: "NEWUSER", emoji: "⭐", title: "Welcome Offer", desc: "40% off your first order", bg: "linear-gradient(135deg,#1a1200,#261900)", border: "rgba(245,166,35,0.3)", codeBg: "rgba(245,166,35,0.2)", codeColor: "#F5A623" },
+  { code: "SEA20", emoji: "⚓", title: "Go to Sea", desc: "20% off boat experiences", bg: "linear-gradient(135deg,#e8f7ef,#d6f0e2)", border: "rgba(30,158,90,0.2)", codeBg: "rgba(30,158,90,0.12)", codeColor: "#167042" },
+  { code: "FRESHFISH", emoji: "🐟", title: "Catch of the Day", desc: "R30 off fresh fish delivery", bg: "linear-gradient(135deg,#e4f5fa,#d0ecf5)", border: "rgba(14,158,194,0.2)", codeBg: "rgba(14,158,194,0.12)", codeColor: "#0A7A99" },
+  { code: "PNPSAVE", emoji: "🛒", title: "PnP Smart Deal", desc: "R50 off grocery orders R300+", bg: "linear-gradient(135deg,#fde8e8,#f9d5d5)", border: "rgba(204,31,26,0.2)", codeBg: "rgba(204,31,26,0.12)", codeColor: "#cc1f1a" },
+  { code: "NEWUSER", emoji: "⭐", title: "Welcome Offer", desc: "40% off your first order", bg: "linear-gradient(135deg,#fef5e3,#fcedd0)", border: "rgba(245,166,35,0.2)", codeBg: "rgba(245,166,35,0.12)", codeColor: "#b87a0a" },
 ];
 
 export function HomeScreen() {
@@ -34,7 +34,7 @@ export function HomeScreen() {
         <div className="flex gap-2">
           <Link href="/notifications" className="w-10 h-10 rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-lg relative">
             🔔
-            <span className="absolute top-[9px] right-[9px] w-[7px] h-[7px] bg-coral rounded-full border-[1.5px] border-dark" />
+            <span className="absolute top-[9px] right-[9px] w-[7px] h-[7px] bg-coral rounded-full border-[1.5px] border-white" />
           </Link>
           <Link href="/profile" className="w-10 h-10 rounded-[14px] bg-primary flex items-center justify-center font-heading font-black text-base">
             E
@@ -53,7 +53,7 @@ export function HomeScreen() {
           href="/food"
           className="flex items-center gap-2.5 bg-dark3 border-[1.5px] border-bd rounded-[14px] px-4 py-3.5"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(17,24,39,0.3)" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
@@ -124,7 +124,7 @@ export function HomeScreen() {
                   {p.code}
                 </span>
               </div>
-              <div className="font-heading font-bold text-[13px] text-white mt-2.5 mb-1">{p.title}</div>
+              <div className="font-heading font-bold text-[13px] text-t1 mt-2.5 mb-1">{p.title}</div>
               <div className="text-[11px] text-t2">{p.desc}</div>
             </div>
           ))}

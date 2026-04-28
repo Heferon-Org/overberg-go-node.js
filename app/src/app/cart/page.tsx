@@ -140,7 +140,7 @@ export default function CartPage() {
           <input
             type="text"
             placeholder="Any special instructions..."
-            className="w-full bg-dark3 border border-bd rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-t3 outline-none focus:border-primary/40 transition-colors"
+            className="w-full bg-dark3 border border-bd rounded-xl px-3 py-2.5 text-sm text-t1 placeholder:text-t3 outline-none focus:border-primary/40 transition-colors"
           />
         </div>
       </div>
@@ -213,7 +213,7 @@ export default function CartPage() {
       </div>
 
       {/* Place order button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-dark/95 backdrop-blur-xl border-t border-bd px-[18px] py-4 pb-8 z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-bd shadow-[0_-2px_8px_rgba(0,0,0,0.06)] px-[18px] py-4 pb-8 z-40">
         <button
           onClick={() => {
             setOrderPlaced(true);

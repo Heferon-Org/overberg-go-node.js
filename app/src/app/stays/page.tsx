@@ -36,7 +36,7 @@ export default function StaysPage() {
 
       <div className="px-[18px] pb-24">
         {filtered.map((stay) => (
-          <div key={stay.id} className="bg-dark2 border border-bd rounded-[18px] overflow-hidden mb-3">
+          <div key={stay.id} className="bg-dark2 border border-bd rounded-[18px] overflow-hidden mb-3 shadow-sm">
             <div
               className="h-[120px] relative flex items-center justify-center text-[48px]"
               style={{ background: stay.bg }}
@@ -54,7 +54,7 @@ export default function StaysPage() {
               <div className="text-[11px] text-t2 mt-1 leading-relaxed">{stay.description}</div>
               <div className="flex items-center gap-1.5 text-[11px] text-t2 mt-2">
                 <span>{stay.meta}</span>
-                <span className="w-[3px] h-[3px] rounded-full bg-white/20" />
+                <span className="w-[3px] h-[3px] rounded-full bg-black/15" />
                 <span className="font-heading font-bold text-primary">{stay.price}</span>
               </div>
             </div>

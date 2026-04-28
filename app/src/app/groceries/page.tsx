@@ -32,7 +32,7 @@ export default function GroceriesPage() {
           <span className="text-lg">⭐</span>
           <div className="flex-1">
             <div className="font-heading font-bold text-xs">Smart Shopper linked · 3,240 pts</div>
-            <div className="mt-1.5 h-1.5 bg-dark rounded-full overflow-hidden">
+            <div className="mt-1.5 h-1.5 bg-dark4 rounded-full overflow-hidden">
               <div className="h-full w-[65%] bg-gradient-to-r from-primary to-sea rounded-full" />
             </div>
           </div>

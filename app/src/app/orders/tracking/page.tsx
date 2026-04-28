@@ -51,7 +51,7 @@ export default function TrackingPage() {
       </div>
 
       {/* Map area */}
-      <div className="mx-[18px] h-[200px] rounded-[18px] bg-gradient-to-br from-[#0E2A3A] to-dark relative overflow-hidden border border-bd mb-4">
+      <div className="mx-[18px] h-[200px] rounded-[18px] bg-gradient-to-br from-[#e8f4f8] to-[#f0f7fa] relative overflow-hidden border border-bd mb-4">
         <div className="absolute inset-0 opacity-[0.06]">
           <div className="absolute top-1/4 left-0 right-0 h-px bg-primary" />
           <div className="absolute top-1/2 left-0 right-0 h-px bg-primary" />
@@ -64,7 +64,7 @@ export default function TrackingPage() {
         {/* Restaurant pin */}
         <div className="absolute top-[25%] left-[30%] flex flex-col items-center">
           <div className="w-3 h-3 rounded-full bg-sea border-2 border-white shadow-lg" />
-          <div className="mt-1 bg-dark/80 backdrop-blur px-2 py-0.5 rounded text-[8px] font-heading font-bold whitespace-nowrap">
+          <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[8px] font-heading font-bold whitespace-nowrap">
             Harbour Café
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function TrackingPage() {
         {/* Delivery pin */}
         <div className="absolute top-[65%] left-[70%] flex flex-col items-center">
           <div className="w-3 h-3 rounded-full bg-primary border-2 border-white shadow-lg" />
-          <div className="mt-1 bg-dark/80 backdrop-blur px-2 py-0.5 rounded text-[8px] font-heading font-bold whitespace-nowrap">
+          <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[8px] font-heading font-bold whitespace-nowrap">
             Marine 127
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function TrackingPage() {
                     i < currentStep
                       ? "bg-primary text-white"
                       : i === currentStep
-                      ? "bg-primary/20 border-2 border-primary text-white"
+                      ? "bg-primary/20 border-2 border-primary text-primary"
                       : "bg-dark3 border border-bd text-t3"
                   }`}
                 >
@@ -139,7 +139,7 @@ export default function TrackingPage() {
               <div className="pt-1.5">
                 <div
                   className={`font-heading font-bold text-sm ${
-                    i <= currentStep ? "text-white" : "text-t3"
+                    i <= currentStep ? "text-t1" : "text-t3"
                   }`}
                 >
                   {step.label}

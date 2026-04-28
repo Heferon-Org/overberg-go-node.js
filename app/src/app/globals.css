@@ -12,16 +12,16 @@
   --color-sand-dark: #D9D3C0;
   --color-sun: #F5A623;
   --color-coral: #E8503A;
-  --color-dark: #0D1F2D;
-  --color-dark2: #102332;
-  --color-dark3: #162C3A;
-  --color-dark4: #1E3547;
-  --color-surf: #243C50;
-  --color-t1: #FFFFFF;
-  --color-t2: rgba(255, 255, 255, 0.62);
-  --color-t3: rgba(255, 255, 255, 0.35);
-  --color-bd: rgba(255, 255, 255, 0.08);
-  --color-bd2: rgba(255, 255, 255, 0.15);
+  --color-dark: #FFFFFF;
+  --color-dark2: #F7F8FA;
+  --color-dark3: #F0F1F4;
+  --color-dark4: #E5E7EB;
+  --color-surf: #D1D5DC;
+  --color-t1: #111827;
+  --color-t2: rgba(17, 24, 39, 0.55);
+  --color-t3: rgba(17, 24, 39, 0.35);
+  --color-bd: rgba(0, 0, 0, 0.07);
+  --color-bd2: rgba(0, 0, 0, 0.11);
 
   --font-heading: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -29,16 +29,13 @@
 
 html, body {
   height: 100%;
-  background: #06121C;
-  color: #fff;
+  background: #FFFFFF;
+  color: #111827;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(30, 158, 90, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(14, 158, 194, 0.07) 0%, transparent 45%),
-    #06121C;
+  background: #FFFFFF;
   font-family: var(--font-body);
 }
 

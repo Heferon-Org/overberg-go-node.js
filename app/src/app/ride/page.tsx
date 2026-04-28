@@ -33,7 +33,7 @@ export default function RidePage() {
       </div>
 
       {/* Map zone */}
-      <div className="mx-[18px] h-[180px] rounded-[18px] bg-gradient-to-br from-[#0E2A3A] to-dark relative overflow-hidden border border-bd mb-4">
+      <div className="mx-[18px] h-[180px] rounded-[18px] bg-gradient-to-br from-[#e8f4f8] to-[#f0f7fa] relative overflow-hidden border border-bd mb-4">
         <div className="absolute inset-0 opacity-[0.08]">
           <div className="absolute top-1/4 left-0 right-0 h-[1.5px] bg-primary/70" />
           <div className="absolute top-1/2 left-0 right-0 h-[1.5px] bg-primary/70" />
@@ -44,11 +44,11 @@ export default function RidePage() {
         </div>
         <div className="absolute top-[28%] left-[38%] flex flex-col items-center">
           <div className="w-3 h-3 rounded-full bg-primary border-2 border-white shadow-lg" />
-          <div className="mt-1 bg-dark/80 backdrop-blur px-2 py-0.5 rounded text-[9px] font-heading font-bold">Marine 127</div>
+          <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[9px] font-heading font-bold">Marine 127</div>
         </div>
         <div className="absolute top-[55%] left-[62%] flex flex-col items-center">
           <div className="w-3 h-3 rounded-full bg-sea border-2 border-white shadow-lg" />
-          <div className="mt-1 bg-dark/80 backdrop-blur px-2 py-0.5 rounded text-[9px] font-heading font-bold">Spar Struisbaai</div>
+          <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[9px] font-heading font-bold">Spar Struisbaai</div>
         </div>
         <div className="absolute left-[48%] top-[40%] text-2xl animate-car">🚗</div>
         <div className="absolute top-3 right-3.5 bg-primary/90 backdrop-blur rounded-xl px-3.5 py-2">
@@ -61,7 +61,7 @@ export default function RidePage() {
       <div className="mx-[18px] bg-dark2 border border-bd rounded-[18px] p-4 mb-3">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-primary" />
-          <div className="font-heading font-semibold text-sm text-white">Marine 127, Struisbaai</div>
+          <div className="font-heading font-semibold text-sm text-t1">Marine 127, Struisbaai</div>
         </div>
         <div className="w-[1.5px] h-4 bg-bd2 ml-[5px] my-1" />
         <div className="flex items-center gap-3">

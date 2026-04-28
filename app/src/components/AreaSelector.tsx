@@ -25,7 +25,7 @@ export function AreaSelector() {
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
           <span>{area}</span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="rgba(17,24,39,0.35)" strokeWidth="1.5">
             <path d="M3 4.5l3 3 3-3" />
           </svg>
         </div>
@@ -37,10 +37,10 @@ export function AreaSelector() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-dark2 border-t border-bd rounded-t-3xl w-full max-w-lg p-6 pb-10"
+            className="bg-white border-t border-bd rounded-t-3xl w-full max-w-lg p-6 pb-10 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5" />
+            <div className="w-10 h-1 bg-black/15 rounded-full mx-auto mb-5" />
             <h2 className="font-heading font-black text-lg mb-4">Choose your area</h2>
             <div className="space-y-2">
               {areas.map((a) => (

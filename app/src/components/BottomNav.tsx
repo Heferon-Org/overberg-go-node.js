@@ -42,13 +42,13 @@ export function BottomNav() {
           className="fixed bottom-[88px] right-4 z-50 w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 active:scale-90 transition-transform"
         >
           <span className="text-2xl">🛒</span>
-          <span className="absolute -top-1 -right-1 bg-coral text-white text-[10px] font-heading font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-dark">
+          <span className="absolute -top-1 -right-1 bg-coral text-white text-[10px] font-heading font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
             {count}
           </span>
         </Link>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-dark/96 backdrop-blur-xl border-t border-bd flex justify-around px-1 pt-3 pb-7 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/96 backdrop-blur-xl border-t border-bd shadow-[0_-1px_3px_rgba(0,0,0,0.06)] flex justify-around px-1 pt-3 pb-7 z-50">
         {tabs.map((tab) => {
           const active = getActive(tab.href);
           return (
@@ -65,7 +65,7 @@ export function BottomNav() {
               <span className="text-xl leading-none relative">
                 {tab.icon}
                 {tab.dot && (
-                  <span className="absolute -top-0.5 -right-1.5 w-2 h-2 bg-coral rounded-full border-2 border-dark" />
+                  <span className="absolute -top-0.5 -right-1.5 w-2 h-2 bg-coral rounded-full border-2 border-white" />
                 )}
               </span>
               <span className="font-heading text-[10px] font-semibold">{tab.label}</span>

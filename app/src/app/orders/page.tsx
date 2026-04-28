@@ -31,7 +31,7 @@ export default function OrdersPage() {
       </h1>
 
       {/* Active order */}
-      <div className="bg-dark2 border border-primary/30 rounded-[18px] p-4 mb-3">
+      <div className="bg-dark2 border border-primary/30 rounded-[18px] p-4 mb-3 shadow-sm">
         <div className="flex items-center gap-2 mb-2">
           <span className="w-[7px] h-[7px] bg-primary rounded-full animate-pulse-live" />
           <span className="font-heading font-bold text-xs text-primary">On the way</span>
@@ -49,13 +49,13 @@ export default function OrdersPage() {
                     step.done
                       ? "bg-primary text-white"
                       : step.active
-                      ? "bg-primary/20 border-2 border-primary text-white"
+                      ? "bg-primary/20 border-2 border-primary text-primary"
                       : "bg-dark3 border border-bd text-t3"
                   }`}
                 >
                   {step.icon}
                 </div>
-                <span className={`text-[9px] mt-1 font-heading font-semibold ${step.done || step.active ? "text-white" : "text-t3"}`}>
+                <span className={`text-[9px] mt-1 font-heading font-semibold ${step.done || step.active ? "text-t1" : "text-t3"}`}>
                   {step.label}
                 </span>
               </div>

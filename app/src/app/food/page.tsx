@@ -28,7 +28,7 @@ export default function FoodPage() {
           Restaurants <span className="text-primary">near you</span>
         </h1>
         <div className="flex items-center gap-2.5 bg-dark3 border-[1.5px] border-bd rounded-[14px] px-4 py-3.5">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(17,24,39,0.3)" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
@@ -37,7 +37,7 @@ export default function FoodPage() {
             placeholder="Search restaurants..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent text-sm text-white placeholder:text-t3 outline-none flex-1"
+            className="bg-transparent text-sm text-t1 placeholder:text-t3 outline-none flex-1"
           />
         </div>
       </div>
