@@ -1,3 +1,6 @@
 node_modules/
 screenshots/
 .next/
+dev-server.log
+app/dev-server.log
+take-screenshots.js
