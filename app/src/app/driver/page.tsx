@@ -103,13 +103,19 @@ export default function DriverPage() {
         </div>
       </div>
 
-      {/* Active trip CTA */}
-      <div className="px-[18px] mb-3">
+      {/* Active trip + Hotspots CTAs */}
+      <div className="px-[18px] mb-3 flex gap-3">
         <Link
           href="/driver/active"
-          className="block w-full bg-sea/10 border border-sea/30 rounded-[14px] p-3 text-center font-heading font-bold text-sm text-sea active:bg-sea/15 transition-colors"
+          className="flex-1 bg-sea/10 border border-sea/30 rounded-[14px] p-3 text-center font-heading font-bold text-sm text-sea active:bg-sea/15 transition-colors"
         >
-          Open Active Trip →
+          Active Trip →
+        </Link>
+        <Link
+          href="/driver/hotspots"
+          className="flex-1 bg-sun/10 border border-sun/30 rounded-[14px] p-3 text-center font-heading font-bold text-sm text-sun active:bg-sun/15 transition-colors"
+        >
+          🗺️ Hotspots
         </Link>
       </div>
 
