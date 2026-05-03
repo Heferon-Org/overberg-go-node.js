@@ -38,6 +38,8 @@ export type Database = {
           opens_at: string | null;
           closes_at: string | null;
           owner_id: string | null;
+          latitude: number | null;
+          longitude: number | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["restaurants"]["Row"]> & { name: string; slug: string };
@@ -79,6 +81,12 @@ export type Database = {
           total: number;
           status: OrderStatus;
           delivery_address: string | null;
+          delivery_latitude: number | null;
+          delivery_longitude: number | null;
+          surge_multiplier: number;
+          surge_zone_id: string | null;
+          dispatch_status: "idle" | "searching" | "assigned" | "failed";
+          delivery_code: string | null;
           payment_method: string | null;
           payment_status: "pending" | "paid" | "failed" | "refunded";
           notes: string | null;
@@ -109,6 +117,7 @@ export type Database = {
           total_trips: number;
           acceptance_rate: number;
           completion_rate: number;
+          kyc_status: "pending" | "verified" | "rejected" | "suspended";
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["drivers"]["Row"]> & { id: string };

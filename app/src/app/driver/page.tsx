@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useToastStore } from "@/lib/store";
 import { useOptionalAuth } from "@/lib/supabase/auth";
 import { useDriverGeolocation } from "@/lib/supabase/hooks";
+import { useDriverDispatchOffer, respondToDispatch } from "@/lib/supabase/dispatch-hooks";
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
@@ -25,6 +26,7 @@ export default function DriverPage() {
   const driverId = auth?.user?.id;
 
   useDriverGeolocation(driverId, online && hasActiveOrder);
+  const liveOffer = useDriverDispatchOffer(driverId);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -101,54 +103,70 @@ export default function DriverPage() {
         </div>
       </div>
 
-      {/* Trip request */}
-      {online && (
+      {/* Live dispatch offer (Phase 5) */}
+      {online && liveOffer && (
         <>
           <div className="px-[18px] mb-2">
             <div className="font-heading font-extrabold text-sm text-sun flex items-center gap-1.5 mb-2.5">
               <div className="w-2 h-2 rounded-full bg-sun animate-pulse-live" />
-              New trip request
+              New trip request · 30s
             </div>
           </div>
           <div className="mx-[18px] bg-dark2 border-2 border-sun/30 rounded-[18px] p-4 mb-4">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <div className="font-heading font-bold text-sm">GoRide Request</div>
-                <div className="text-[11px] text-t2 mt-0.5">3.2 km pickup · 8.1 km trip</div>
+                <div className="font-heading font-bold text-sm">Order Pickup</div>
+                <div className="text-[11px] text-t2 mt-0.5">
+                  {liveOffer.distance_km
+                    ? `${liveOffer.distance_km.toFixed(1)} km away`
+                    : "Distance unknown"}
+                  {liveOffer.notes ? ` · ${liveOffer.notes}` : ""}
+                </div>
               </div>
-              <div className="font-heading font-black text-xl text-primary">R68</div>
-            </div>
-            <div className="space-y-1 mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                <span className="text-xs">Struisbaai Harbour, Main St</span>
-              </div>
-              <div className="w-[1.5px] h-4 bg-bd2 ml-1" />
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-sea" />
-                <span className="text-xs">Cape Agulhas Lighthouse, L&apos;Agulhas</span>
-              </div>
+              <div className="font-heading font-black text-xl text-primary">Offer #{liveOffer.attempt_number}</div>
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setHasActiveOrder(false);
-                  showToast("Trip declined");
+                onClick={async () => {
+                  const r = await respondToDispatch(liveOffer.order_id, "reject");
+                  showToast(r.ok ? "Trip declined — finding next driver" : r.error || "Failed");
                 }}
                 className="flex-1 bg-dark3 border border-bd text-t2 font-heading font-bold text-sm py-3 rounded-2xl active:scale-[0.98] transition-transform"
               >
                 Decline
               </button>
               <button
-                onClick={() => {
-                  setHasActiveOrder(true);
-                  showToast("✓ Trip accepted! Navigate to pickup →");
+                onClick={async () => {
+                  const r = await respondToDispatch(liveOffer.order_id, "accept");
+                  if (r.ok) {
+                    setHasActiveOrder(true);
+                    showToast("✓ Trip accepted! Navigate to pickup →");
+                  } else {
+                    showToast(r.error || "Failed");
+                  }
                 }}
                 className="flex-[2] bg-primary text-white font-heading font-bold text-sm py-3 rounded-2xl active:bg-primary-dark active:scale-[0.98] transition-all"
               >
-                Accept · R68
+                Accept
               </button>
             </div>
+          </div>
+        </>
+      )}
+
+      {/* Demo trip request (when no live offer) */}
+      {online && !liveOffer && (
+        <>
+          <div className="px-[18px] mb-2">
+            <div className="font-heading font-extrabold text-sm text-t3 flex items-center gap-1.5 mb-2.5">
+              <div className="w-2 h-2 rounded-full bg-t3" />
+              Waiting for dispatch
+            </div>
+          </div>
+          <div className="mx-[18px] bg-dark2 border border-bd rounded-[18px] p-4 mb-4 text-center">
+            <div className="text-2xl mb-2">🛵</div>
+            <div className="font-heading font-bold text-sm text-t2">No active offers</div>
+            <div className="text-[11px] text-t3 mt-1">You&apos;ll be notified when a nearby order is placed</div>
           </div>
         </>
       )}
