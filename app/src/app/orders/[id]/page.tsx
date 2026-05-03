@@ -3,10 +3,11 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useOrder, useDriverPosition } from "@/lib/supabase/hooks";
+import { useOrder, useDriverPosition, transitionOrder } from "@/lib/supabase/hooks";
 import { useOptionalAuth } from "@/lib/supabase/auth";
 import { getDirections, formatEta, type DirectionsResult } from "@/lib/mapbox/directions";
 import { RatingModal } from "@/components/RatingModal";
+import { useToastStore } from "@/lib/store";
 import type { OrderStatus } from "@/lib/supabase/types";
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
@@ -28,10 +29,12 @@ const DEMO_CUSTOMER: [number, number] = [20.0556, -34.7683]; // Marine 127 area
 export default function OrderTrackingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: orderId } = use(params);
   const auth = useOptionalAuth();
+  const showToast = useToastStore((s) => s.show);
   const { order, loading } = useOrder(orderId);
   const driverPosition = useDriverPosition(order?.driver_id ?? undefined);
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const [showRating, setShowRating] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   const currentStatus = order?.status || "placed";
   const currentStepIndex = STEP_CONFIG.findIndex((s) => s.key === currentStatus);
@@ -217,6 +220,41 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
             <div className="font-heading font-black text-lg">{(directions.distance / 1000).toFixed(1)} km</div>
             <div className="text-[10px] text-t2 font-heading font-semibold">Distance</div>
           </div>
+        </div>
+      )}
+
+      {/* Delivery code (shown when driver has picked up or is on the way) */}
+      {order?.delivery_code &&
+        (currentStatus === "picked_up" || currentStatus === "on_the_way") && (
+        <div className="mx-[18px] bg-primary/[0.06] border border-primary/25 rounded-[18px] p-4 mb-4 flex items-center justify-between">
+          <div>
+            <div className="font-heading font-bold text-xs text-t2 mb-0.5">Show this code to driver</div>
+            <div className="text-[10px] text-t3">Confirms delivery</div>
+          </div>
+          <div className="font-heading font-black text-3xl text-primary tracking-[0.25em]">
+            {order.delivery_code}
+          </div>
+        </div>
+      )}
+
+      {/* Cancel button (only while still cancellable) */}
+      {order && (currentStatus === "placed" || currentStatus === "confirmed") &&
+        order.customer_id === auth?.user?.id && (
+        <div className="mx-[18px] mb-4">
+          <button
+            onClick={async () => {
+              if (cancelling) return;
+              setCancelling(true);
+              const r = await transitionOrder(order.id, "cancelled");
+              setCancelling(false);
+              if (r.ok) showToast("✓ Order cancelled — refund processing");
+              else showToast(r.error || "Failed");
+            }}
+            disabled={cancelling}
+            className="w-full bg-coral/10 border border-coral/25 text-coral font-heading font-bold text-sm py-3 rounded-2xl active:bg-coral/15 transition-colors disabled:opacity-60"
+          >
+            {cancelling ? "Cancelling..." : "Cancel Order"}
+          </button>
         </div>
       )}
 

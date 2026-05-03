@@ -46,8 +46,16 @@ export default function VendorPage() {
             </div>
             <div className="text-[11px] text-t2 ml-6">Harbour Café · Struisbaai Harbour</div>
           </div>
-          <div className="bg-primary/10 border border-primary/30 rounded-[10px] px-3 py-1.5">
-            <span className="font-heading font-bold text-[11px] text-primary">● Open</span>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/vendor/orders"
+              className="bg-sea/10 border border-sea/30 rounded-[10px] px-3 py-1.5 font-heading font-bold text-[11px] text-sea"
+            >
+              Live Orders →
+            </Link>
+            <div className="bg-primary/10 border border-primary/30 rounded-[10px] px-3 py-1.5">
+              <span className="font-heading font-bold text-[11px] text-primary">● Open</span>
+            </div>
           </div>
         </div>
       </div>

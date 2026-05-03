@@ -103,6 +103,16 @@ export default function DriverPage() {
         </div>
       </div>
 
+      {/* Active trip CTA */}
+      <div className="px-[18px] mb-3">
+        <Link
+          href="/driver/active"
+          className="block w-full bg-sea/10 border border-sea/30 rounded-[14px] p-3 text-center font-heading font-bold text-sm text-sea active:bg-sea/15 transition-colors"
+        >
+          Open Active Trip →
+        </Link>
+      </div>
+
       {/* Live dispatch offer (Phase 5) */}
       {online && liveOffer && (
         <>

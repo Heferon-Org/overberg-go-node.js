@@ -628,6 +628,79 @@ export function useOrder(orderId: string | undefined) {
   return { order, loading, isLive: isConfigured() };
 }
 
+// ═══════════════════════════════════════════
+// DRIVER ACTIVE ORDER (with Realtime)
+// ═══════════════════════════════════════════
+
+export function useDriverActiveOrder(driverId: string | undefined) {
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConfigured() || !driverId) {
+      setLoading(false);
+      return;
+    }
+
+    const client = getClient();
+
+    const fetchActive = () => {
+      client
+        .from("orders")
+        .select("*")
+        .eq("driver_id", driverId)
+        .in("status", ["confirmed", "preparing", "ready", "picked_up", "on_the_way"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+        .then(({ data }) => {
+          setOrder((data as Order | null) || null);
+          setLoading(false);
+        });
+    };
+
+    fetchActive();
+
+    const channel = client
+      .channel(`driver-active-${driverId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `driver_id=eq.${driverId}`,
+        },
+        () => fetchActive()
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [driverId]);
+
+  return { order, loading, isLive: isConfigured() };
+}
+
+// ═══════════════════════════════════════════
+// ORDER STATUS TRANSITION (vendor / driver / customer)
+// ═══════════════════════════════════════════
+
+export async function transitionOrder(
+  orderId: string,
+  status: string
+): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`/api/orders/${orderId}/transition`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) return { ok: false, error: json.error || `http ${res.status}` };
+  return { ok: true };
+}
+
 export function useWallet(userId: string | undefined) {
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<WalletTx[]>([]);
