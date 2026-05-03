@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToastStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +20,7 @@ function AuthPageInner() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const showToast = useToastStore((s) => s.show);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,6 +30,19 @@ function AuthPageInner() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_URL !== "your-supabase-url-here";
 
+  const formatPhone = (raw: string) =>
+    raw.startsWith("+") ? raw : `+27${raw.replace(/^0/, "")}`;
+
+  const startCountdown = useCallback(() => {
+    setCountdown(30);
+    const timer = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) { clearInterval(timer); return 0; }
+        return c - 1;
+      });
+    }, 1000);
+  }, []);
+
   const handleSendOtp = async () => {
     if (phone.length < 7) {
       showToast("Enter a valid phone number");
@@ -36,7 +50,6 @@ function AuthPageInner() {
     }
 
     if (!isSupabaseConfigured) {
-      // Demo mode
       setOtpSent(true);
       showToast("✓ Demo mode — OTP is 1234");
       return;
@@ -44,7 +57,7 @@ function AuthPageInner() {
 
     setLoading(true);
     const supabase = createClient();
-    const formattedPhone = phone.startsWith("+") ? phone : `+27${phone.replace(/^0/, "")}`;
+    const formattedPhone = formatPhone(phone);
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
       options: mode === "signup" ? { data: { full_name: name } } : undefined,
@@ -55,7 +68,23 @@ function AuthPageInner() {
       showToast(error.message);
     } else {
       setOtpSent(true);
+      startCountdown();
       showToast("✓ OTP sent to " + phone);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (countdown > 0) return;
+    setLoading(true);
+    const supabase = createClient();
+    const formattedPhone = formatPhone(phone);
+    const { error } = await supabase.auth.signInWithOtp({ phone: formattedPhone });
+    setLoading(false);
+    if (error) {
+      showToast(error.message);
+    } else {
+      startCountdown();
+      showToast("✓ OTP resent");
     }
   };
 
@@ -66,7 +95,6 @@ function AuthPageInner() {
     }
 
     if (!isSupabaseConfigured) {
-      // Demo mode — accept any 4-digit code
       showToast("✓ Welcome to OverBerg Go!");
       router.push(redirect);
       return;
@@ -74,20 +102,39 @@ function AuthPageInner() {
 
     setLoading(true);
     const supabase = createClient();
-    const formattedPhone = phone.startsWith("+") ? phone : `+27${phone.replace(/^0/, "")}`;
+    const formattedPhone = formatPhone(phone);
     const { error } = await supabase.auth.verifyOtp({
       phone: formattedPhone,
       token: otp,
       type: "sms",
     });
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       showToast(error.message);
-    } else {
-      showToast("✓ Welcome to OverBerg Go!");
-      router.push(redirect);
+      return;
     }
+
+    // Check if profile is complete
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      const row = profile as { full_name: string | null } | null;
+      if (!row || !row.full_name) {
+        setLoading(false);
+        router.push("/auth/complete-profile");
+        return;
+      }
+    }
+
+    setLoading(false);
+    showToast("✓ Welcome to OverBerg Go!");
+    router.push(redirect);
   };
 
   const handleSocialLogin = async (provider: "google" | "apple") => {
@@ -98,7 +145,7 @@ function AuthPageInner() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}${redirect}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirect)}` },
     });
   };
 
@@ -240,14 +287,15 @@ function AuthPageInner() {
 
             <div className="text-center">
               <button
-                onClick={() => showToast("✓ OTP resent")}
-                className="text-primary font-heading font-bold text-xs"
+                onClick={handleResendOtp}
+                disabled={countdown > 0}
+                className="text-primary font-heading font-bold text-xs disabled:text-t3"
               >
-                Resend code
+                {countdown > 0 ? `Resend in ${countdown}s` : "Resend code"}
               </button>
               <span className="text-t3 text-xs mx-2">·</span>
               <button
-                onClick={() => setOtpSent(false)}
+                onClick={() => { setOtpSent(false); setOtp(""); }}
                 className="text-t2 font-heading font-bold text-xs"
               >
                 Change number

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Routes that require authentication
-const protectedRoutes = ["/orders", "/profile", "/driver", "/vendor", "/cart", "/settings"];
+const protectedRoutes = ["/orders", "/profile", "/driver", "/vendor", "/cart", "/settings", "/wallet"];
 
 export async function middleware(request: NextRequest) {
   // Skip if Supabase is not configured

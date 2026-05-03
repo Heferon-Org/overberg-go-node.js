@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import type { Restaurant, MenuItem, Experience, Stay, Order, OrderStatus } from "./types";
+import type { Restaurant, MenuItem, Experience, Stay, Order, OrderStatus, KycDocument, SupportTicket, Payment } from "./types";
 
 // Use untyped client for flexibility — typed queries via cast on results
 function getClient() {
@@ -332,4 +332,117 @@ export async function updateMenuItemAvailability(itemId: string, available: bool
     .update({ available })
     .eq("id", itemId);
   return { error };
+}
+
+// ═══════════════════════════════════════════
+// KYC DOCUMENTS
+// ═══════════════════════════════════════════
+
+export function useKycDocuments(userId: string | undefined, role?: "driver" | "vendor") {
+  const [documents, setDocuments] = useState<KycDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConfigured() || !userId) {
+      setLoading(false);
+      return;
+    }
+
+    let query = getClient()
+      .from("kyc_documents")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (role) query = query.eq("applicant_role", role);
+
+    query.then(({ data }) => {
+      if (data) setDocuments(data);
+      setLoading(false);
+    });
+  }, [userId, role]);
+
+  const allApproved = documents.length > 0 && documents.every((d) => d.verification_status === "approved");
+  const hasPending = documents.some((d) => d.verification_status === "pending");
+  const hasRejected = documents.some((d) => d.verification_status === "rejected");
+
+  return { documents, loading, allApproved, hasPending, hasRejected, isLive: isConfigured() };
+}
+
+// ═══════════════════════════════════════════
+// SUPPORT TICKETS
+// ═══════════════════════════════════════════
+
+export function useSupportTickets(userId: string | undefined) {
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConfigured() || !userId) {
+      setLoading(false);
+      return;
+    }
+
+    getClient()
+      .from("support_tickets")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setTickets(data);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  return { tickets, loading, isLive: isConfigured() };
+}
+
+export async function createSupportTicket(ticket: {
+  userId: string;
+  orderId?: string;
+  subject: string;
+  description?: string;
+  category?: string;
+  priority?: string;
+}) {
+  const insertData = {
+    user_id: ticket.userId,
+    order_id: ticket.orderId || null,
+    subject: ticket.subject,
+    description: ticket.description || null,
+    category: ticket.category || "general",
+    priority: ticket.priority || "normal",
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await getClient().from("support_tickets").insert(insertData as any).select().single();
+  return { ticket: data, error };
+}
+
+// ═══════════════════════════════════════════
+// PAYMENTS
+// ═══════════════════════════════════════════
+
+export function usePayments(userId: string | undefined) {
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConfigured() || !userId) {
+      setLoading(false);
+      return;
+    }
+
+    getClient()
+      .from("payments")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setPayments(data);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  return { payments, loading, isLive: isConfigured() };
 }
