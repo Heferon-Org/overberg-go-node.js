@@ -2,22 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useToastStore, useAddressStore } from "@/lib/store";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { getDirections, formatEta } from "@/lib/mapbox/directions";
 import { ScheduleModal } from "@/components/ScheduleModal";
+
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 const rideTypes = [
   { name: "GoRide", emoji: "🚗", price: 55, eta: "4 min · 1-3 pax" },
   { name: "GoPremium", emoji: "🚙", price: 85, eta: "6 min · 1-4 pax" },
   { name: "GoXL", emoji: "🚐", price: 110, eta: "8 min · 5-7 pax" },
-];
-
-const quickPlaces = [
-  { emoji: "🏠", name: "Home" },
-  { emoji: "🛒", name: "Spar" },
-  { emoji: "🏥", name: "Clinic" },
-  { emoji: "✈️", name: "Airport" },
-  { emoji: "🏖️", name: "Beach" },
-  { emoji: "💡", name: "Lighthouse" },
 ];
 
 export default function RidePage() {
@@ -26,8 +22,33 @@ export default function RidePage() {
   const defaultAddress = useAddressStore((s) => s.getDefault);
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduledTime, setScheduledTime] = useState<{ date: string; time: string } | null>(null);
+  const [destination, setDestination] = useState("");
+  const [destCoords, setDestCoords] = useState<[number, number] | null>(null);
+  const [routeGeometry, setRouteGeometry] = useState<GeoJSON.LineString | null>(null);
+  const [routeEta, setRouteEta] = useState<string | null>(null);
   const ride = rideTypes[selected];
   const addr = defaultAddress();
+
+  const pickupCoords: [number, number] = [20.0507, -34.7731];
+
+  const handleDestinationChange = async (address: string, coords?: [number, number]) => {
+    setDestination(address);
+    if (coords) {
+      setDestCoords(coords);
+      const result = await getDirections(pickupCoords, coords);
+      if (result) {
+        setRouteGeometry(result.geometry);
+        setRouteEta(formatEta(result.duration));
+      }
+    }
+  };
+
+  const mapPins = [
+    { lng: pickupCoords[0], lat: pickupCoords[1], color: "#1E9E5A", emoji: "📍", label: addr?.address || "Marine 127, Struisbaai" },
+  ];
+  if (destCoords) {
+    mapPins.push({ lng: destCoords[0], lat: destCoords[1], color: "#0E9EC2", emoji: "🏁", label: destination });
+  }
 
   return (
     <div>
@@ -37,55 +58,45 @@ export default function RidePage() {
         </h1>
       </div>
 
-      {/* Map zone */}
-      <div className="mx-[18px] h-[180px] rounded-[18px] bg-gradient-to-br from-[#e8f4f8] to-[#f0f7fa] relative overflow-hidden border border-bd mb-4">
-        <div className="absolute inset-0 opacity-[0.08]">
-          <div className="absolute top-1/4 left-0 right-0 h-[1.5px] bg-primary/70" />
-          <div className="absolute top-1/2 left-0 right-0 h-[1.5px] bg-primary/70" />
-          <div className="absolute top-3/4 left-0 right-0 h-[1.5px] bg-primary/70" />
-          <div className="absolute left-1/4 top-0 bottom-0 w-[1.5px] bg-primary/50" />
-          <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-primary/50" />
-          <div className="absolute left-3/4 top-0 bottom-0 w-[1.5px] bg-primary/50" />
-        </div>
-        <div className="absolute top-[28%] left-[38%] flex flex-col items-center">
-          <div className="w-3 h-3 rounded-full bg-primary border-2 border-white shadow-lg" />
-          <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[9px] font-heading font-bold">Marine 127</div>
-        </div>
-        <div className="absolute top-[55%] left-[62%] flex flex-col items-center">
-          <div className="w-3 h-3 rounded-full bg-sea border-2 border-white shadow-lg" />
-          <div className="mt-1 bg-white/90 backdrop-blur shadow-sm px-2 py-0.5 rounded text-[9px] font-heading font-bold">Spar Struisbaai</div>
-        </div>
-        <div className="absolute left-[48%] top-[40%] text-2xl animate-car">🚗</div>
-        <div className="absolute top-3 right-3.5 bg-primary/90 backdrop-blur rounded-xl px-3.5 py-2">
-          <div className="font-heading font-extrabold text-[13px] text-white">3 min away</div>
-          <div className="text-[10px] text-white/80">Nearest driver</div>
-        </div>
+      {/* Live Mapbox map */}
+      <div className="mx-[18px] rounded-[18px] overflow-hidden border border-bd mb-4 relative">
+        <MapView
+          className="h-[180px] w-full"
+          center={destCoords ? [(pickupCoords[0] + destCoords[0]) / 2, (pickupCoords[1] + destCoords[1]) / 2] : pickupCoords}
+          zoom={destCoords ? 12 : 14}
+          pins={mapPins}
+          route={routeGeometry}
+        />
+        {routeEta && (
+          <div className="absolute top-3 right-3.5 bg-primary/90 backdrop-blur rounded-xl px-3.5 py-2">
+            <div className="font-heading font-extrabold text-[13px] text-white">{routeEta}</div>
+            <div className="text-[10px] text-white/80">Estimated trip</div>
+          </div>
+        )}
+        {!routeEta && (
+          <div className="absolute top-3 right-3.5 bg-primary/90 backdrop-blur rounded-xl px-3.5 py-2">
+            <div className="font-heading font-extrabold text-[13px] text-white">3 min away</div>
+            <div className="text-[10px] text-white/80">Nearest driver</div>
+          </div>
+        )}
       </div>
 
       {/* Address inputs */}
       <div className="mx-[18px] bg-dark2 border border-bd rounded-[18px] p-4 mb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-3 h-3 rounded-full bg-primary" />
-          <div className="font-heading font-semibold text-sm text-t1">{addr?.address || "Marine 127, Struisbaai"}</div>
+          <div className="font-heading font-semibold text-sm text-t1 flex-1">{addr?.address || "Marine 127, Struisbaai"}</div>
         </div>
-        <div className="w-[1.5px] h-4 bg-bd2 ml-[5px] my-1" />
+        <div className="w-[1.5px] h-2 bg-bd2 ml-[5px] mb-2" />
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-sea" />
-          <div className="font-heading font-semibold text-sm text-t3">Where to?</div>
+          <div className="w-3 h-3 rounded-full bg-sea shrink-0" />
+          <AddressAutocomplete
+            value={destination}
+            onChange={handleDestinationChange}
+            placeholder="Where to?"
+            className="flex-1"
+          />
         </div>
-      </div>
-
-      {/* Quick places */}
-      <div className="flex gap-2 overflow-x-auto px-[18px] pb-4 no-scrollbar">
-        {quickPlaces.map((p) => (
-          <div
-            key={p.name}
-            className="shrink-0 flex items-center gap-2 bg-dark2 border border-bd rounded-full px-4 py-2.5"
-          >
-            <span className="text-base">{p.emoji}</span>
-            <span className="font-heading font-semibold text-xs">{p.name}</span>
-          </div>
-        ))}
       </div>
 
       {/* Ride types */}

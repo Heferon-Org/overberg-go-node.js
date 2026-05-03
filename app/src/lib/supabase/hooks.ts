@@ -466,6 +466,168 @@ export function usePayments(userId: string | undefined) {
 // WALLET (balance + transactions, with realtime)
 // ═══════════════════════════════════════════
 
+// ═══════════════════════════════════════════
+// DRIVER LOCATION (geolocation tracking)
+// ═══════════════════════════════════════════
+
+export function useDriverGeolocation(driverId: string | undefined, active: boolean) {
+  const [tracking, setTracking] = useState(false);
+
+  useEffect(() => {
+    if (!isConfigured() || !driverId || !active) {
+      setTracking(false);
+      return;
+    }
+
+    if (!navigator.geolocation) return;
+
+    setTracking(true);
+    const client = getClient();
+
+    const intervalId = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          client
+            .from("drivers")
+            .update({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+            } as Record<string, unknown>)
+            .eq("id", driverId)
+            .then(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 4000 }
+      );
+    }, 5000);
+
+    // Fire immediately once
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        client
+          .from("drivers")
+          .update({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          } as Record<string, unknown>)
+          .eq("id", driverId)
+          .then(() => {});
+      },
+      () => {}
+    );
+
+    return () => {
+      clearInterval(intervalId);
+      setTracking(false);
+    };
+  }, [driverId, active]);
+
+  return { tracking };
+}
+
+// ═══════════════════════════════════════════
+// LIVE DRIVER POSITION (Realtime subscription for customers)
+// ═══════════════════════════════════════════
+
+export function useDriverPosition(driverId: string | undefined) {
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (!isConfigured() || !driverId) return;
+
+    const client = getClient();
+
+    // Initial fetch
+    client
+      .from("drivers")
+      .select("latitude, longitude")
+      .eq("id", driverId)
+      .single()
+      .then(({ data }) => {
+        const row = data as { latitude: number | null; longitude: number | null } | null;
+        if (row?.latitude && row?.longitude) {
+          setPosition({ lat: row.latitude, lng: row.longitude });
+        }
+      });
+
+    // Realtime subscription
+    const channel = client
+      .channel(`driver-pos-${driverId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "drivers",
+          filter: `id=eq.${driverId}`,
+        },
+        (payload) => {
+          const row = payload.new as { latitude: number | null; longitude: number | null };
+          if (row.latitude && row.longitude) {
+            setPosition({ lat: row.latitude, lng: row.longitude });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [driverId]);
+
+  return position;
+}
+
+// ═══════════════════════════════════════════
+// ORDER DETAIL (single order with Realtime)
+// ═══════════════════════════════════════════
+
+export function useOrder(orderId: string | undefined) {
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConfigured() || !orderId) {
+      setLoading(false);
+      return;
+    }
+
+    const client = getClient();
+
+    client
+      .from("orders")
+      .select("*")
+      .eq("id", orderId)
+      .single()
+      .then(({ data }) => {
+        if (data) setOrder(data as Order);
+        setLoading(false);
+      });
+
+    const channel = client
+      .channel(`order-${orderId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+          filter: `id=eq.${orderId}`,
+        },
+        (payload) => {
+          setOrder(payload.new as Order);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [orderId]);
+
+  return { order, loading, isLive: isConfigured() };
+}
+
 export function useWallet(userId: string | undefined) {
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<WalletTx[]>([]);

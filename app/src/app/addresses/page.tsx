@@ -42,12 +42,12 @@ export default function AddressesPage() {
           ←
         </Link>
         <h1 className="font-heading font-black text-lg">Saved Addresses</h1>
-        <button
-          onClick={() => setShowAdd(true)}
+        <Link
+          href="/addresses/new"
           className="ml-auto w-10 h-10 rounded-[14px] bg-primary/10 border border-primary/25 flex items-center justify-center text-primary font-bold text-lg"
         >
           +
-        </button>
+        </Link>
       </div>
 
       <div className="px-[18px] pb-24">
@@ -113,12 +113,12 @@ export default function AddressesPage() {
           <div className="text-center py-12">
             <div className="text-4xl mb-3">📍</div>
             <div className="font-heading font-bold text-sm text-t2">No saved addresses</div>
-            <button
-              onClick={() => setShowAdd(true)}
+            <Link
+              href="/addresses/new"
               className="text-primary font-heading font-bold text-xs mt-2"
             >
               Add your first address
-            </button>
+            </Link>
           </div>
         )}
       </div>

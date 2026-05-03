@@ -1,19 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useToastStore } from "@/lib/store";
+import { useOptionalAuth } from "@/lib/supabase/auth";
+import { useDriverGeolocation } from "@/lib/supabase/hooks";
+
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 const weekStats = [
   { title: "This week", value: "R2,840", color: "text-primary", sub: "47 trips · 6 days" },
   { title: "Acceptance rate", value: "92%", color: "text-t1", sub: "Top Driver tier" },
   { title: "Completion", value: "99%", color: "text-t1", sub: "0 cancellations" },
-  { title: "Next payout", value: "R1,680", color: "text-sun", sub: "Thursday EFT" },
+  { title: "Next payout", value: "R1,680", color: "text-sun", sub: "Friday EFT" },
 ];
 
 export default function DriverPage() {
   const [online, setOnline] = useState(true);
+  const [hasActiveOrder, setHasActiveOrder] = useState(true);
+  const [currentPos, setCurrentPos] = useState<{ lat: number; lng: number } | null>(null);
   const showToast = useToastStore((s) => s.show);
+  const auth = useOptionalAuth();
+  const driverId = auth?.user?.id;
+
+  useDriverGeolocation(driverId, online && hasActiveOrder);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setCurrentPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setCurrentPos({ lat: -34.7731, lng: 20.0507 }),
+      { timeout: 5000 }
+    );
+  }, []);
+
+  const mapCenter: [number, number] = currentPos
+    ? [currentPos.lng, currentPos.lat]
+    : [20.0507, -34.7731];
 
   return (
     <div>
@@ -52,11 +76,13 @@ export default function DriverPage() {
         </div>
 
         {/* Active status */}
-        <div className="flex items-center gap-2 bg-primary/[0.08] border border-primary/20 rounded-xl p-2.5 px-3.5 mb-4">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse-live" />
-          <span className="font-heading font-bold text-[13px]">Active · Struisbaai area</span>
-          <span className="text-[11px] text-t2 ml-auto">3 riders nearby</span>
-        </div>
+        {online && (
+          <div className="flex items-center gap-2 bg-primary/[0.08] border border-primary/20 rounded-xl p-2.5 px-3.5 mb-4">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse-live" />
+            <span className="font-heading font-bold text-[13px]">Active · Struisbaai area</span>
+            <span className="text-[11px] text-t2 ml-auto">3 riders nearby</span>
+          </div>
+        )}
       </div>
 
       {/* Earnings */}
@@ -76,46 +102,56 @@ export default function DriverPage() {
       </div>
 
       {/* Trip request */}
-      <div className="px-[18px] mb-2">
-        <div className="font-heading font-extrabold text-sm text-sun flex items-center gap-1.5 mb-2.5">
-          <div className="w-2 h-2 rounded-full bg-sun animate-pulse-live" />
-          New trip request
-        </div>
-      </div>
-      <div className="mx-[18px] bg-dark2 border-2 border-sun/30 rounded-[18px] p-4 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="font-heading font-bold text-sm">GoRide Request</div>
-            <div className="text-[11px] text-t2 mt-0.5">3.2 km pickup · 8.1 km trip</div>
+      {online && (
+        <>
+          <div className="px-[18px] mb-2">
+            <div className="font-heading font-extrabold text-sm text-sun flex items-center gap-1.5 mb-2.5">
+              <div className="w-2 h-2 rounded-full bg-sun animate-pulse-live" />
+              New trip request
+            </div>
           </div>
-          <div className="font-heading font-black text-xl text-primary">R68</div>
-        </div>
-        <div className="space-y-1 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-            <span className="text-xs">Struisbaai Harbour, Main St</span>
+          <div className="mx-[18px] bg-dark2 border-2 border-sun/30 rounded-[18px] p-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="font-heading font-bold text-sm">GoRide Request</div>
+                <div className="text-[11px] text-t2 mt-0.5">3.2 km pickup · 8.1 km trip</div>
+              </div>
+              <div className="font-heading font-black text-xl text-primary">R68</div>
+            </div>
+            <div className="space-y-1 mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                <span className="text-xs">Struisbaai Harbour, Main St</span>
+              </div>
+              <div className="w-[1.5px] h-4 bg-bd2 ml-1" />
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-sea" />
+                <span className="text-xs">Cape Agulhas Lighthouse, L&apos;Agulhas</span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setHasActiveOrder(false);
+                  showToast("Trip declined");
+                }}
+                className="flex-1 bg-dark3 border border-bd text-t2 font-heading font-bold text-sm py-3 rounded-2xl active:scale-[0.98] transition-transform"
+              >
+                Decline
+              </button>
+              <button
+                onClick={() => {
+                  setHasActiveOrder(true);
+                  showToast("✓ Trip accepted! Navigate to pickup →");
+                }}
+                className="flex-[2] bg-primary text-white font-heading font-bold text-sm py-3 rounded-2xl active:bg-primary-dark active:scale-[0.98] transition-all"
+              >
+                Accept · R68
+              </button>
+            </div>
           </div>
-          <div className="w-[1.5px] h-4 bg-bd2 ml-1" />
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-sea" />
-            <span className="text-xs">Cape Agulhas Lighthouse, L&apos;Agulhas</span>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => showToast("Trip declined")}
-            className="flex-1 bg-dark3 border border-bd text-t2 font-heading font-bold text-sm py-3 rounded-2xl active:scale-[0.98] transition-transform"
-          >
-            Decline
-          </button>
-          <button
-            onClick={() => showToast("✓ Trip accepted! Navigate to pickup →")}
-            className="flex-[2] bg-primary text-white font-heading font-bold text-sm py-3 rounded-2xl active:bg-primary-dark active:scale-[0.98] transition-all"
-          >
-            Accept · R68
-          </button>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Weekly stats */}
       <div className="grid grid-cols-2 gap-3 px-[18px] mb-4">
@@ -128,20 +164,26 @@ export default function DriverPage() {
         ))}
       </div>
 
-      {/* Mini map */}
+      {/* Live Mapbox map */}
       <div className="px-[18px] mb-4">
         <div className="font-heading font-bold text-sm mb-2.5">Your area</div>
-        <div className="h-[120px] bg-gradient-to-br from-[#e8f4f8] to-[#f0f7fa] rounded-[16px] relative overflow-hidden border border-bd">
-          <div className="absolute inset-0 opacity-[0.08]">
-            <div className="absolute top-1/3 left-0 right-0 h-[1.5px] bg-primary/70" />
-            <div className="absolute top-2/3 left-0 right-0 h-[1.5px] bg-primary/70" />
-            <div className="absolute left-1/3 top-0 bottom-0 w-[1.5px] bg-primary/50" />
-            <div className="absolute left-2/3 top-0 bottom-0 w-[1.5px] bg-primary/50" />
-          </div>
-          <div className="absolute top-[40%] left-[45%] text-xl animate-car">🚗</div>
-          <div className="absolute bottom-2.5 left-3.5 bg-primary/90 rounded-lg px-2.5 py-1.5 font-heading font-bold text-[11px]">
-            📍 You — Struisbaai Harbour
-          </div>
+        <div className="rounded-[16px] overflow-hidden border border-bd">
+          <MapView
+            className="h-[140px] w-full"
+            center={mapCenter}
+            zoom={13}
+            pins={[
+              {
+                lng: mapCenter[0],
+                lat: mapCenter[1],
+                color: "#1E9E5A",
+                emoji: "🚗",
+                label: "You — Struisbaai",
+                pulse: online,
+              },
+            ]}
+            interactive={false}
+          />
         </div>
       </div>
 
@@ -149,6 +191,7 @@ export default function DriverPage() {
         <button
           onClick={() => {
             setOnline(false);
+            setHasActiveOrder(false);
             showToast("Going offline. See you next time!");
           }}
           className="w-full bg-primary text-white font-heading font-extrabold text-base rounded-2xl py-[17px] active:bg-primary-dark active:scale-[0.98] transition-all"
