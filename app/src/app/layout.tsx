@@ -4,6 +4,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { Toast } from "@/components/Toast";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { SplashScreen } from "@/components/SplashScreen";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { AddToHomeScreen } from "@/components/AddToHomeScreen";
 import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
@@ -42,9 +44,11 @@ export default function RootLayout({
       </head>
       <body className="min-h-dvh bg-white text-t1 font-body pb-20">
         <Providers>
+          <OfflineBanner />
           {children}
           <BottomNav />
           <Toast />
+          <AddToHomeScreen />
           <SplashScreen />
           <ServiceWorkerRegistrar />
         </Providers>

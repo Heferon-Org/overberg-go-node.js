@@ -30,7 +30,8 @@ export function SplashScreen() {
         <div className="absolute -inset-4 rounded-[32px] border border-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
       </div>
       <h1 className="font-heading font-black text-2xl tracking-tight mb-1">OverBerg Go</h1>
-      <p className="text-t3 text-xs font-heading">Struisbaai · L&apos;Agulhas · Arniston</p>
+      <p className="text-t2 text-xs font-heading font-semibold">Food · Rides · Experiences</p>
+      <p className="text-t3 text-[10px] font-heading mt-1">Struisbaai · L&apos;Agulhas · Arniston · Bredasdorp</p>
     </div>
   );
 }
