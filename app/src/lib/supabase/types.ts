@@ -422,6 +422,27 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["kyc_documents"]["Row"]>;
       };
+      whatsapp_conversations: {
+        Row: {
+          id: string;
+          customer_phone: string;
+          customer_name: string | null;
+          user_id: string | null;
+          intent_state: string;
+          cart_draft: Record<string, unknown>[];
+          last_message: string | null;
+          last_bot_reply: string | null;
+          prefill_token: string | null;
+          token_used: boolean;
+          message_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["whatsapp_conversations"]["Row"]> & {
+          customer_phone: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["whatsapp_conversations"]["Row"]>;
+      };
     };
   };
 };

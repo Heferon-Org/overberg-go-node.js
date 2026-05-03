@@ -1,6 +1,6 @@
 /**
  * Order transition notifications — sends across all channels.
- * Inserts in-app notification + FCM push + Twilio SMS + Brevo email.
+ * Inserts in-app notification + FCM push + Twilio SMS + Brevo email + WhatsApp.
  * Each channel gracefully degrades if credentials are missing.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,6 +9,7 @@ type AdminClient = any;
 import type { OrderStatus } from "@/lib/supabase/types";
 import { notify } from "./index";
 import { getOrderTemplate, getDriverAssignedTemplate } from "./templates";
+import { notifyOrderViaWhatsApp } from "@/lib/whatsapp/order-updates";
 
 interface TransitionPayload {
   orderId: string;
@@ -55,11 +56,20 @@ export async function notifyOrderTransition(admin: AdminClient, p: TransitionPay
     });
   }
 
+  // WhatsApp notification (non-blocking)
+  notifyOrderViaWhatsApp(admin, {
+    customerId: p.customerId,
+    driverId: p.driverId,
+    orderNumber: p.orderNumber,
+    newStatus: p.newStatus,
+    deliveryCode: p.deliveryCode,
+  }).catch(() => {});
+
   console.log("[notify] order transition", {
     order: p.orderNumber,
     transition: `${p.oldStatus} → ${p.newStatus}`,
     customer: p.customerId,
     driver: p.driverId,
-    channels: customerChannels,
+    channels: [...customerChannels, "whatsapp"],
   });
 }

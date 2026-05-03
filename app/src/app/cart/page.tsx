@@ -7,6 +7,7 @@ import { ScheduleModal } from "@/components/ScheduleModal";
 import { useOptionalAuth } from "@/lib/supabase/auth";
 import { useWallet } from "@/lib/supabase/hooks";
 import { PayfastRedirect } from "@/components/PayfastRedirect";
+import { useWhatsAppPrefill } from "@/lib/whatsapp/prefill";
 
 function isLiveSupabase() {
   return !!(
@@ -24,6 +25,7 @@ const promoDatabase: Record<string, { discount: number; type: "percent" | "flat"
 };
 
 export default function CartPage() {
+  useWhatsAppPrefill();
   const items = useCartStore((s) => s.items);
   const decrementItem = useCartStore((s) => s.decrementItem);
   const addItem = useCartStore((s) => s.addItem);
