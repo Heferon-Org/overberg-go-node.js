@@ -4,6 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCartStore, useToastStore, useWalletStore, useAddressStore, useLoyaltyStore } from "@/lib/store";
 import { ScheduleModal } from "@/components/ScheduleModal";
+import { useOptionalAuth } from "@/lib/supabase/auth";
+import { useWallet } from "@/lib/supabase/hooks";
+import { PayfastRedirect } from "@/components/PayfastRedirect";
+
+function isLiveSupabase() {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== "your-supabase-url-here"
+  );
+}
 
 const promoDatabase: Record<string, { discount: number; type: "percent" | "flat"; label: string }> = {
   SEA20: { discount: 20, type: "percent", label: "20% off" },
@@ -25,17 +35,24 @@ export default function CartPage() {
   const applyPromo = useCartStore((s) => s.applyPromo);
   const removePromo = useCartStore((s) => s.removePromo);
   const showToast = useToastStore((s) => s.show);
-  const walletBalance = useWalletStore((s) => s.balance);
+  const live = isLiveSupabase();
+  const auth = useOptionalAuth();
+  const userId = auth?.user?.id;
+  const liveWallet = useWallet(userId);
+  const localWallet = useWalletStore();
+  const walletBalance = live ? liveWallet.balance : localWallet.balance;
   const walletPay = useWalletStore((s) => s.pay);
   const walletCashback = useWalletStore((s) => s.addCashback);
   const defaultAddress = useAddressStore((s) => s.getDefault);
   const addPoints = useLoyaltyStore((s) => s.addPoints);
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState("payfast");
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [showPromoInput, setShowPromoInput] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduledTime, setScheduledTime] = useState<{ date: string; time: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [redirect, setRedirect] = useState<{ url: string; fields: Record<string, string> } | null>(null);
 
   const deliveryFee = 35;
   const serviceFee = Math.round(total() * 0.05);
@@ -57,20 +74,105 @@ export default function CartPage() {
     showToast(`✓ ${promo.label} applied — you save R${disc}`);
   };
 
-  const handlePlaceOrder = () => {
-    if (paymentMethod === "wallet") {
-      if (walletBalance < grandTotal) {
-        showToast("Insufficient wallet balance");
-        return;
+  const handlePlaceOrder = async () => {
+    if (submitting) return;
+
+    // Demo mode — local wallet only
+    if (!live) {
+      if (paymentMethod === "wallet") {
+        if (localWallet.balance < grandTotal) {
+          showToast("Insufficient wallet balance");
+          return;
+        }
+        walletPay(grandTotal, `${items[0]?.restaurantName || "Order"}`);
+        const cashback = Math.round(grandTotal * 0.05);
+        walletCashback(cashback, "5% cashback");
       }
-      walletPay(grandTotal, `${items[0]?.restaurantName || "Order"}`);
-      const cashback = Math.round(grandTotal * 0.05);
-      walletCashback(cashback, "5% cashback");
+      addPoints(Math.floor(grandTotal / 10));
+      setOrderPlaced(true);
+      clearCart();
+      return;
     }
+
+    // Live mode
+    if (paymentMethod === "wallet") {
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/payments/wallet/charge", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: grandTotal,
+            description: `${items[0]?.restaurantName || "Order"}`,
+            cashbackRate: 0.05,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if (data.error === "insufficient_balance") {
+            showToast("Insufficient wallet balance");
+          } else if (data.error === "unauthorized") {
+            showToast("Please sign in to pay with wallet");
+          } else {
+            showToast(data.error || "Payment failed");
+          }
+          setSubmitting(false);
+          return;
+        }
+        addPoints(Math.floor(grandTotal / 10));
+        setOrderPlaced(true);
+        clearCart();
+      } catch {
+        showToast("Network error");
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    if (paymentMethod === "payfast" || paymentMethod === "card") {
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/payments/payfast/initiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: grandTotal,
+            intent: "order_payment",
+            itemName: `${items[0]?.restaurantName || "Order"} (${count()} items)`,
+            itemDescription: items.map((i) => `${i.quantity}× ${i.name}`).join(", "),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showToast(data.error || "Payment failed");
+          setSubmitting(false);
+          return;
+        }
+        clearCart();
+        setRedirect({ url: data.url, fields: data.fields });
+      } catch {
+        showToast("Network error");
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // Cash on delivery
     addPoints(Math.floor(grandTotal / 10));
     setOrderPlaced(true);
     clearCart();
   };
+
+  if (redirect) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-8 text-center">
+        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-6" />
+        <h1 className="font-heading font-black text-xl mb-2">Redirecting to PayFast...</h1>
+        <p className="text-t2 text-sm">Please don&apos;t close this window.</p>
+        <PayfastRedirect url={redirect.url} fields={redirect.fields} />
+      </div>
+    );
+  }
 
   if (orderPlaced) {
     return (
@@ -366,9 +468,10 @@ export default function CartPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-bd shadow-[0_-2px_8px_rgba(0,0,0,0.06)] px-[18px] py-4 pb-8 z-40">
         <button
           onClick={handlePlaceOrder}
-          className="w-full bg-primary text-white font-heading font-extrabold text-base rounded-2xl py-[17px] active:bg-primary-dark active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+          disabled={submitting}
+          className="w-full bg-primary text-white font-heading font-extrabold text-base rounded-2xl py-[17px] active:bg-primary-dark active:scale-[0.98] transition-all shadow-lg shadow-primary/20 disabled:opacity-60"
         >
-          Place Order · R{grandTotal}
+          {submitting ? "Processing..." : `Place Order · R${grandTotal}`}
         </button>
       </div>
 

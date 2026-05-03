@@ -4,6 +4,21 @@ import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import type { Restaurant, MenuItem, Experience, Stay, Order, OrderStatus, KycDocument, SupportTicket, Payment } from "./types";
 
+// Locally-typed wallet transaction (table not yet in Database type)
+export interface WalletTx {
+  id: string;
+  user_id: string;
+  type: "topup" | "payment" | "refund" | "cashback" | "referral" | "withdrawal" | "adjustment";
+  amount: number;
+  balance_after: number;
+  description: string;
+  reference: string | null;
+  payment_id: string | null;
+  order_id: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
 // Use untyped client for flexibility — typed queries via cast on results
 function getClient() {
   return createBrowserClient(
@@ -445,4 +460,63 @@ export function usePayments(userId: string | undefined) {
   }, [userId]);
 
   return { payments, loading, isLive: isConfigured() };
+}
+
+// ═══════════════════════════════════════════
+// WALLET (balance + transactions, with realtime)
+// ═══════════════════════════════════════════
+
+export function useWallet(userId: string | undefined) {
+  const [balance, setBalance] = useState<number>(0);
+  const [transactions, setTransactions] = useState<WalletTx[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isConfigured() || !userId) {
+      setLoading(false);
+      return;
+    }
+
+    const client = getClient();
+
+    Promise.all([
+      client.from("profiles").select("wallet_balance").eq("id", userId).single(),
+      client
+        .from("wallet_transactions")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+    ]).then(([profileRes, txRes]) => {
+      const profileRow = profileRes.data as { wallet_balance: number } | null;
+      if (profileRow) setBalance(Number(profileRow.wallet_balance));
+      if (txRes.data) setTransactions(txRes.data as unknown as WalletTx[]);
+      setLoading(false);
+    });
+
+    // Realtime — listen for new transactions
+    const channel = client
+      .channel(`wallet-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "wallet_transactions",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const tx = payload.new as unknown as WalletTx;
+          setTransactions((prev) => [tx, ...prev]);
+          setBalance(Number(tx.balance_after));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      client.removeChannel(channel);
+    };
+  }, [userId]);
+
+  return { balance, transactions, loading, isLive: isConfigured() };
 }

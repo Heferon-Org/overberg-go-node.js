@@ -11,6 +11,7 @@ export type Database = {
           address: string | null;
           area: string;
           smart_shopper_points: number;
+          wallet_balance: number;
           created_at: string;
           updated_at: string;
         };
@@ -353,6 +354,29 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["support_tickets"]["Row"]>;
       };
+      wallet_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: "topup" | "payment" | "refund" | "cashback" | "referral" | "withdrawal" | "adjustment";
+          amount: number;
+          balance_after: number;
+          description: string;
+          reference: string | null;
+          payment_id: string | null;
+          order_id: string | null;
+          metadata: Record<string, unknown> | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["wallet_transactions"]["Row"]> & {
+          user_id: string;
+          type: Database["public"]["Tables"]["wallet_transactions"]["Row"]["type"];
+          amount: number;
+          balance_after: number;
+          description: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["wallet_transactions"]["Row"]>;
+      };
       kyc_documents: {
         Row: {
           id: string;
@@ -423,3 +447,4 @@ export type MerchantRating = Database["public"]["Tables"]["merchant_ratings"]["R
 export type PromoCode = Database["public"]["Tables"]["promo_codes"]["Row"];
 export type SupportTicket = Database["public"]["Tables"]["support_tickets"]["Row"];
 export type KycDocument = Database["public"]["Tables"]["kyc_documents"]["Row"];
+export type WalletTransaction = Database["public"]["Tables"]["wallet_transactions"]["Row"];

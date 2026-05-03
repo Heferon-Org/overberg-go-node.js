@@ -109,3 +109,8 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
+
+/** Safe variant — returns null when AuthProvider is not mounted (demo mode). */
+export function useOptionalAuth() {
+  return useContext(AuthContext);
+}

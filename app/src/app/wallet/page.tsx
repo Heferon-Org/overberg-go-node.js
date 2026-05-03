@@ -3,20 +3,84 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useWalletStore, useToastStore } from "@/lib/store";
+import { useOptionalAuth } from "@/lib/supabase/auth";
+import { useWallet } from "@/lib/supabase/hooks";
+import { PayfastRedirect } from "@/components/PayfastRedirect";
 
 const topUpAmounts = [50, 100, 200, 500, 1000];
 
+function isLiveSupabase() {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== "your-supabase-url-here"
+  );
+}
+
 export default function WalletPage() {
-  const { balance, transactions, topUp } = useWalletStore();
+  const live = isLiveSupabase();
+  const auth = useOptionalAuth();
+  const userId = auth?.user?.id;
+
+  // Live wallet via Supabase (no-op when userId undefined)
+  const liveWallet = useWallet(userId);
+
+  // Local fallback for demo mode
+  const localWallet = useWalletStore();
+
+  const balance = live ? liveWallet.balance : localWallet.balance;
+  const transactions = live
+    ? liveWallet.transactions.map((t) => ({
+        id: t.id,
+        type: t.type,
+        amount: Number(t.amount),
+        description: t.description,
+        date: new Date(t.created_at).toISOString().split("T")[0],
+      }))
+    : localWallet.transactions;
+
   const showToast = useToastStore((s) => s.show);
   const [showTopUp, setShowTopUp] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [redirect, setRedirect] = useState<{ url: string; fields: Record<string, string> } | null>(null);
 
-  const handleTopUp = (amount: number) => {
-    topUp(amount);
-    setShowTopUp(false);
-    setCustomAmount("");
-    showToast(`✓ R${amount} added to wallet`);
+  const handleTopUp = async (amount: number) => {
+    if (!live) {
+      localWallet.topUp(amount);
+      setShowTopUp(false);
+      setCustomAmount("");
+      showToast(`✓ R${amount} added to wallet`);
+      return;
+    }
+
+    if (amount < 5) {
+      showToast("Minimum top-up is R5");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/payments/payfast/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          intent: "wallet_topup",
+          itemName: "OverBerg Go Wallet Top-up",
+          itemDescription: `Top up wallet by R${amount}`,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || "Top-up failed");
+        setSubmitting(false);
+        return;
+      }
+      setRedirect({ url: data.url, fields: data.fields });
+    } catch {
+      showToast("Network error");
+      setSubmitting(false);
+    }
   };
 
   const typeConfig: Record<string, { emoji: string; color: string }> = {
@@ -25,7 +89,20 @@ export default function WalletPage() {
     refund: { emoji: "↩️", color: "text-sea" },
     cashback: { emoji: "🎁", color: "text-sun" },
     referral: { emoji: "👥", color: "text-primary" },
+    withdrawal: { emoji: "🏦", color: "text-coral" },
+    adjustment: { emoji: "⚖️", color: "text-t2" },
   };
+
+  if (redirect) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-8 text-center">
+        <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-6" />
+        <h1 className="font-heading font-black text-xl mb-2">Redirecting to PayFast...</h1>
+        <p className="text-t2 text-sm">Please don&apos;t close this window.</p>
+        <PayfastRedirect url={redirect.url} fields={redirect.fields} />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -46,7 +123,7 @@ export default function WalletPage() {
         <div className="relative">
           <div className="text-white/70 text-xs font-heading font-semibold mb-1">Available Balance</div>
           <div className="font-heading font-black text-4xl text-white mb-1">
-            R{balance.toLocaleString()}
+            R{Number(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-white/60 text-[11px] font-heading">OverBerg Go Wallet</div>
         </div>
@@ -98,50 +175,62 @@ export default function WalletPage() {
         <h2 className="font-heading font-extrabold text-sm">Transaction History</h2>
       </div>
       <div className="px-[18px] pb-24">
-        <div className="bg-dark2 border border-bd rounded-[18px] overflow-hidden">
-          {transactions.map((tx, i) => {
-            const cfg = typeConfig[tx.type] || typeConfig.payment;
-            return (
-              <div
-                key={tx.id}
-                className={`flex items-center gap-3 px-4 py-3.5 ${
-                  i < transactions.length - 1 ? "border-b border-bd" : ""
-                }`}
-              >
-                <div className="w-10 h-10 rounded-xl bg-dark3 flex items-center justify-center text-lg">
-                  {cfg.emoji}
+        {transactions.length === 0 ? (
+          <div className="bg-dark2 border border-bd rounded-[18px] p-6 text-center">
+            <div className="text-3xl mb-2">📭</div>
+            <p className="text-sm font-heading font-bold">No transactions yet</p>
+            <p className="text-xs text-t2 mt-1">Top up your wallet to get started</p>
+          </div>
+        ) : (
+          <div className="bg-dark2 border border-bd rounded-[18px] overflow-hidden">
+            {transactions.map((tx, i) => {
+              const cfg = typeConfig[tx.type] || typeConfig.payment;
+              return (
+                <div
+                  key={tx.id}
+                  className={`flex items-center gap-3 px-4 py-3.5 ${
+                    i < transactions.length - 1 ? "border-b border-bd" : ""
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-dark3 flex items-center justify-center text-lg">
+                    {cfg.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-heading font-bold text-sm">{tx.description}</div>
+                    <div className="text-[10px] text-t3 mt-0.5">{tx.date}</div>
+                  </div>
+                  <div className={`font-heading font-black text-sm ${tx.amount >= 0 ? "text-primary" : "text-t1"}`}>
+                    {tx.amount >= 0 ? "+" : ""}R{Math.abs(tx.amount).toFixed(2)}
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-heading font-bold text-sm">{tx.description}</div>
-                  <div className="text-[10px] text-t3 mt-0.5">{tx.date}</div>
-                </div>
-                <div className={`font-heading font-black text-sm ${tx.amount >= 0 ? "text-primary" : "text-t1"}`}>
-                  {tx.amount >= 0 ? "+" : ""}R{Math.abs(tx.amount)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Top-up modal */}
       {showTopUp && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-end justify-center"
-          onClick={() => setShowTopUp(false)}
+          onClick={() => !submitting && setShowTopUp(false)}
         >
           <div
             className="bg-white border-t border-bd rounded-t-3xl w-full max-w-lg p-6 pb-10 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-black/15 rounded-full mx-auto mb-5" />
-            <h2 className="font-heading font-black text-lg mb-4">Top Up Wallet</h2>
+            <h2 className="font-heading font-black text-lg mb-1">Top Up Wallet</h2>
+            <p className="text-xs text-t2 mb-4">
+              {live ? "Secure top-up via PayFast" : "Demo mode — no real payment"}
+            </p>
             <div className="grid grid-cols-3 gap-2.5 mb-4">
               {topUpAmounts.map((amt) => (
                 <button
                   key={amt}
+                  disabled={submitting}
                   onClick={() => handleTopUp(amt)}
-                  className="bg-dark3 border border-bd rounded-xl py-3 font-heading font-bold text-sm active:bg-primary/10 active:border-primary/30 transition-colors"
+                  className="bg-dark3 border border-bd rounded-xl py-3 font-heading font-bold text-sm active:bg-primary/10 active:border-primary/30 transition-colors disabled:opacity-50"
                 >
                   R{amt}
                 </button>
@@ -159,26 +248,18 @@ export default function WalletPage() {
             </div>
             {customAmount && (
               <button
+                disabled={submitting}
                 onClick={() => handleTopUp(Number(customAmount))}
-                className="w-full bg-primary text-white font-heading font-bold text-sm py-3.5 rounded-2xl active:bg-primary-dark transition-colors mb-2"
+                className="w-full bg-primary text-white font-heading font-bold text-sm py-3.5 rounded-2xl active:bg-primary-dark transition-colors mb-2 disabled:opacity-50"
               >
-                Top Up R{customAmount}
+                {submitting ? "Redirecting..." : `Top Up R${customAmount}`}
               </button>
             )}
-            <div className="flex gap-2 mt-2">
-              {[
-                { icon: "💳", label: "Card" },
-                { icon: "🏦", label: "EFT" },
-                { icon: "📱", label: "SnapScan" },
-              ].map((m) => (
-                <div
-                  key={m.label}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-dark2 border border-bd rounded-xl py-2.5 text-[11px] font-heading font-semibold text-t2"
-                >
-                  <span>{m.icon}</span> {m.label}
-                </div>
-              ))}
-            </div>
+            {live && (
+              <p className="text-[10px] text-t3 text-center mt-3">
+                You will be redirected to PayFast (sandbox) to complete payment.
+              </p>
+            )}
           </div>
         </div>
       )}
