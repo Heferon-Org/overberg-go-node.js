@@ -2,27 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useCartStore } from "@/lib/store";
-
-const tabs = [
-  { href: "/", label: "Home", icon: "🏠", id: "home" },
-  { href: "/food", label: "Food", icon: "🍽️", id: "food" },
-  { href: "/explore", label: "Explore", icon: "⚓", id: "explore" },
-  { href: "/orders", label: "Orders", icon: "📦", id: "orders", dot: true },
-  { href: "/profile", label: "Me", icon: "👤", id: "me" },
-];
 
 export function BottomNav() {
   const pathname = usePathname();
   const cartCount = useCartStore((s) => s.count);
+  const t = useTranslations("nav");
 
-  // Hide bottom nav on driver/vendor dashboards and auth/cart
+  const tabs = [
+    { href: "/", label: t("home"), icon: "🏠", id: "home" },
+    { href: "/food", label: t("food"), icon: "🍽️", id: "food" },
+    { href: "/explore", label: t("explore"), icon: "⚓", id: "explore" },
+    { href: "/orders", label: t("orders"), icon: "📦", id: "orders", dot: true },
+    { href: "/profile", label: t("me"), icon: "👤", id: "me" },
+  ];
+
   if (
     pathname.startsWith("/driver") ||
     pathname.startsWith("/vendor") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/cart") ||
-    pathname.startsWith("/chat")
+    pathname.startsWith("/chat") ||
+    pathname.startsWith("/admin")
   ) {
     return null;
   }
@@ -36,7 +38,6 @@ export function BottomNav() {
 
   return (
     <>
-      {/* Floating cart badge */}
       {count > 0 && (
         <Link
           href="/cart"

@@ -1,40 +1,53 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useToastStore } from "@/lib/store";
-
-const sections = [
-  {
-    title: "Account",
-    items: [
-      { icon: "👤", label: "Edit Profile", sub: "Name, email, phone number" },
-      { icon: "📍", label: "Saved Addresses", sub: "Home, Work, and more" },
-      { icon: "💳", label: "Payment Methods", sub: "Visa ···4521, PayFast, SnapScan" },
-      { icon: "⭐", label: "Smart Shopper", sub: "3,240 points · Linked" },
-    ],
-  },
-  {
-    title: "Preferences",
-    items: [
-      { icon: "🔔", label: "Notifications", sub: "Push, email, SMS preferences" },
-      { icon: "🌍", label: "Language", sub: "English" },
-      { icon: "🌙", label: "Appearance", sub: "Dark mode (default)" },
-      { icon: "📏", label: "Distance Units", sub: "Kilometres" },
-    ],
-  },
-  {
-    title: "Support",
-    items: [
-      { icon: "❓", label: "Help Centre", sub: "FAQs and support articles" },
-      { icon: "💬", label: "Contact Us", sub: "Chat, email, or phone" },
-      { icon: "📋", label: "Report an Issue", sub: "Food quality, delivery, app bugs" },
-      { icon: "📜", label: "Terms & Privacy", sub: "Terms of Service, Privacy Policy" },
-    ],
-  },
-];
+import { useLocale } from "@/i18n/provider";
+import type { Locale } from "@/i18n/config";
 
 export default function SettingsPage() {
   const showToast = useToastStore((s) => s.show);
+  const t = useTranslations("settings");
+  const [locale, setLocale] = useLocale();
+  const [showLangPicker, setShowLangPicker] = useState(false);
+
+  const sections = [
+    {
+      title: t("account"),
+      items: [
+        { icon: "👤", label: "Edit Profile", sub: "Name, email, phone number" },
+        { icon: "📍", label: "Saved Addresses", sub: "Home, Work, and more" },
+        { icon: "💳", label: "Payment Methods", sub: "Visa ···4521, PayFast, SnapScan" },
+        { icon: "⭐", label: "Smart Shopper", sub: "3,240 points · Linked" },
+      ],
+    },
+    {
+      title: t("preferences"),
+      items: [
+        { icon: "🔔", label: t("notifications"), sub: "Push, email, SMS preferences" },
+        { icon: "🌍", label: t("language"), sub: locale === "af" ? "Afrikaans" : "English", action: () => setShowLangPicker(true) },
+        { icon: "🌙", label: t("darkMode"), sub: "Dark mode (default)" },
+        { icon: "📏", label: "Distance Units", sub: "Kilometres" },
+      ],
+    },
+    {
+      title: t("support"),
+      items: [
+        { icon: "❓", label: t("helpCenter"), sub: "FAQs and support articles" },
+        { icon: "💬", label: t("contactUs"), sub: "Chat, email, or phone" },
+        { icon: "📋", label: "Report an Issue", sub: "Food quality, delivery, app bugs" },
+        { icon: "📜", label: "Terms & Privacy", sub: "Terms of Service, Privacy Policy" },
+      ],
+    },
+  ];
+
+  function handleLanguageChange(l: Locale) {
+    setLocale(l);
+    setShowLangPicker(false);
+    showToast(l === "af" ? "✓ Taal verander na Afrikaans" : "✓ Language changed to English");
+  }
 
   return (
     <div>
@@ -45,7 +58,7 @@ export default function SettingsPage() {
         >
           ←
         </Link>
-        <h1 className="font-heading font-black text-lg">Settings</h1>
+        <h1 className="font-heading font-black text-lg">{t("title")}</h1>
       </div>
 
       <div className="px-[18px] pb-24">
@@ -58,7 +71,10 @@ export default function SettingsPage() {
               {section.items.map((item, i) => (
                 <button
                   key={item.label}
-                  onClick={() => showToast(`${item.label} — coming soon`)}
+                  onClick={() => {
+                    if ("action" in item && item.action) item.action();
+                    else showToast(`${item.label} — coming soon`);
+                  }}
                   className={`w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-black/[0.03] transition-colors ${
                     i < section.items.length - 1 ? "border-b border-bd" : ""
                   }`}
@@ -78,7 +94,7 @@ export default function SettingsPage() {
         {/* App info */}
         <div className="bg-dark2 border border-bd rounded-[18px] p-4 mb-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="font-heading font-bold text-sm">App Version</span>
+            <span className="font-heading font-bold text-sm">{t("version")}</span>
             <span className="text-xs text-t2">1.0.0 (PWA)</span>
           </div>
           <div className="flex items-center justify-between">
@@ -92,13 +108,40 @@ export default function SettingsPage() {
           href="/auth"
           className="w-full bg-coral/10 border border-coral/25 text-coral font-heading font-bold text-sm rounded-2xl py-4 text-center block active:scale-[0.98] transition-transform"
         >
-          Log Out
+          {t("logout")}
         </Link>
 
         <p className="text-center text-[10px] text-t3 mt-4">
           Made with 🌿 in the Overberg
         </p>
       </div>
+
+      {/* Language picker modal */}
+      {showLangPicker && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-6" onClick={() => setShowLangPicker(false)}>
+          <div className="bg-white rounded-3xl p-6 max-w-[320px] w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-heading font-black text-lg mb-4 text-center">{t("language")}</h3>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleLanguageChange("en")}
+                className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-colors ${locale === "en" ? "border-primary bg-primary/5" : "border-bd"}`}
+              >
+                <span className="text-xl">🇬🇧</span>
+                <span className="font-heading font-bold text-sm">English</span>
+                {locale === "en" && <span className="ml-auto text-primary font-bold">✓</span>}
+              </button>
+              <button
+                onClick={() => handleLanguageChange("af")}
+                className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-colors ${locale === "af" ? "border-primary bg-primary/5" : "border-bd"}`}
+              >
+                <span className="text-xl">🇿🇦</span>
+                <span className="font-heading font-bold text-sm">Afrikaans</span>
+                {locale === "af" && <span className="ml-auto text-primary font-bold">✓</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
