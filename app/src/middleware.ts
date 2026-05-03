@@ -1,11 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-// Routes that require authentication
 const protectedRoutes = ["/orders", "/profile", "/driver", "/vendor", "/cart", "/settings", "/wallet"];
+const adminRoutes = ["/admin"];
 
 export async function middleware(request: NextRequest) {
-  // Skip if Supabase is not configured
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.NEXT_PUBLIC_SUPABASE_URL === "your-supabase-url-here"
@@ -15,9 +14,9 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Check if route needs protection
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
-  if (!isProtected) return NextResponse.next();
+  const isAdmin = adminRoutes.some((route) => pathname.startsWith(route));
+  if (!isProtected && !isAdmin) return NextResponse.next();
 
   let response = NextResponse.next({
     request: { headers: request.headers },
@@ -50,7 +49,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Redirect to auth if not logged in
   if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
@@ -58,11 +56,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (isAdmin) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || profile.role !== "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|firebase-messaging-sw.js|icons/).*)",
   ],
 };
