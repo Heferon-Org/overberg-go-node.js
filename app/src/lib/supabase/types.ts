@@ -205,6 +205,186 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["notifications"]["Row"]>;
       };
+      payments: {
+        Row: {
+          id: string;
+          order_id: string | null;
+          user_id: string | null;
+          amount: number;
+          currency: string;
+          provider: "payfast" | "wallet" | "cash" | "card";
+          provider_ref: string | null;
+          status: "pending" | "processing" | "completed" | "failed" | "refunded" | "cancelled";
+          payload: Record<string, unknown> | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["payments"]["Row"]> & { amount: number };
+        Update: Partial<Database["public"]["Tables"]["payments"]["Row"]>;
+      };
+      dispatch_logs: {
+        Row: {
+          id: string;
+          order_id: string;
+          driver_id: string | null;
+          attempt_number: number;
+          action: "offered" | "accepted" | "rejected" | "timed_out" | "cancelled" | "completed";
+          distance_km: number | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["dispatch_logs"]["Row"]> & {
+          order_id: string;
+          action: Database["public"]["Tables"]["dispatch_logs"]["Row"]["action"];
+        };
+        Update: Partial<Database["public"]["Tables"]["dispatch_logs"]["Row"]>;
+      };
+      surge_zones: {
+        Row: {
+          id: string;
+          name: string;
+          area: string;
+          lat_min: number;
+          lat_max: number;
+          lng_min: number;
+          lng_max: number;
+          multiplier: number;
+          active: boolean;
+          starts_at: string | null;
+          ends_at: string | null;
+          reason: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["surge_zones"]["Row"]> & {
+          name: string;
+          area: string;
+          lat_min: number;
+          lat_max: number;
+          lng_min: number;
+          lng_max: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["surge_zones"]["Row"]>;
+      };
+      driver_ratings: {
+        Row: {
+          id: string;
+          driver_id: string;
+          customer_id: string | null;
+          order_id: string | null;
+          rating: number;
+          tags: string[];
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["driver_ratings"]["Row"]> & {
+          driver_id: string;
+          rating: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["driver_ratings"]["Row"]>;
+      };
+      merchant_ratings: {
+        Row: {
+          id: string;
+          restaurant_id: string;
+          customer_id: string | null;
+          order_id: string | null;
+          rating: number;
+          food_quality: number | null;
+          packaging: number | null;
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["merchant_ratings"]["Row"]> & {
+          restaurant_id: string;
+          rating: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["merchant_ratings"]["Row"]>;
+      };
+      promo_codes: {
+        Row: {
+          id: string;
+          code: string;
+          description: string | null;
+          discount_type: "percent" | "fixed" | "free_delivery";
+          discount_value: number;
+          min_order_amount: number;
+          max_discount: number | null;
+          applies_to: "all" | "food" | "ride" | "shop" | "sea" | "stays";
+          usage_limit: number | null;
+          usage_count: number;
+          per_user_limit: number;
+          starts_at: string;
+          ends_at: string | null;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["promo_codes"]["Row"]> & {
+          code: string;
+          discount_value: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["promo_codes"]["Row"]>;
+      };
+      support_tickets: {
+        Row: {
+          id: string;
+          ticket_number: string;
+          user_id: string | null;
+          order_id: string | null;
+          subject: string;
+          description: string | null;
+          category:
+            | "general"
+            | "order_issue"
+            | "payment_issue"
+            | "driver_issue"
+            | "merchant_issue"
+            | "app_bug"
+            | "refund_request";
+          priority: "low" | "normal" | "high" | "urgent";
+          status: "open" | "in_progress" | "waiting_user" | "resolved" | "closed";
+          assigned_to: string | null;
+          resolved_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["support_tickets"]["Row"]> & {
+          subject: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["support_tickets"]["Row"]>;
+      };
+      kyc_documents: {
+        Row: {
+          id: string;
+          user_id: string;
+          applicant_role: "driver" | "vendor";
+          document_type:
+            | "sa_id"
+            | "drivers_license"
+            | "vehicle_registration"
+            | "vehicle_photo"
+            | "business_registration"
+            | "owner_id"
+            | "bank_proof"
+            | "tax_clearance"
+            | "food_handlers_cert"
+            | "insurance";
+          file_url: string;
+          verification_status: "pending" | "approved" | "rejected" | "expired";
+          rejection_reason: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          expires_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["kyc_documents"]["Row"]> & {
+          user_id: string;
+          applicant_role: "driver" | "vendor";
+          document_type: Database["public"]["Tables"]["kyc_documents"]["Row"]["document_type"];
+          file_url: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["kyc_documents"]["Row"]>;
+      };
     };
   };
 };
@@ -235,3 +415,11 @@ export type Driver = Database["public"]["Tables"]["drivers"]["Row"];
 export type Experience = Database["public"]["Tables"]["experiences"]["Row"];
 export type Stay = Database["public"]["Tables"]["stays"]["Row"];
 export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+export type Payment = Database["public"]["Tables"]["payments"]["Row"];
+export type DispatchLog = Database["public"]["Tables"]["dispatch_logs"]["Row"];
+export type SurgeZone = Database["public"]["Tables"]["surge_zones"]["Row"];
+export type DriverRating = Database["public"]["Tables"]["driver_ratings"]["Row"];
+export type MerchantRating = Database["public"]["Tables"]["merchant_ratings"]["Row"];
+export type PromoCode = Database["public"]["Tables"]["promo_codes"]["Row"];
+export type SupportTicket = Database["public"]["Tables"]["support_tickets"]["Row"];
+export type KycDocument = Database["public"]["Tables"]["kyc_documents"]["Row"];

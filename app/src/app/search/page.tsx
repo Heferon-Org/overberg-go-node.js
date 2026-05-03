@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { restaurants, experiences, stays } from "@/lib/data";
+import {
+  fetchRestaurants,
+  fetchExperiences,
+  fetchStays,
+  type Restaurant,
+  type Experience,
+  type Stay,
+} from "@/lib/data";
 
 const recentSearches = ["Calamari", "Whale watching", "L'Agulhas", "Dog walker"];
 const trendingSearches = ["Harbour Café", "Sea adventures", "Fish & chips", "Braai pack"];
@@ -20,6 +27,19 @@ interface SearchResult {
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [stays, setStays] = useState<Stay[]>([]);
+
+  useEffect(() => {
+    Promise.all([fetchRestaurants(), fetchExperiences(), fetchStays()]).then(
+      ([r, e, s]) => {
+        setRestaurants(r);
+        setExperiences(e);
+        setStays(s);
+      }
+    );
+  }, []);
 
   const getResults = (): SearchResult[] => {
     if (!query.trim()) return [];

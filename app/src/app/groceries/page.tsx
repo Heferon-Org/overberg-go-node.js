@@ -1,10 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useToastStore } from "@/lib/store";
-import { groceryCategories, groceryProducts } from "@/lib/data";
+import { groceryCategories, fetchGroceryProducts, type GroceryProduct } from "@/lib/data";
 
 export default function GroceriesPage() {
   const showToast = useToastStore((s) => s.show);
+  const [groceryProducts, setGroceryProducts] = useState<GroceryProduct[]>([]);
+
+  useEffect(() => {
+    fetchGroceryProducts().then(setGroceryProducts);
+  }, []);
 
   return (
     <div>

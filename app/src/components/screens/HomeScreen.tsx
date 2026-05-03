@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AreaSelector } from "@/components/AreaSelector";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { restaurants } from "@/lib/data";
+import { fetchRestaurants, type Restaurant } from "@/lib/data";
 import { useWalletStore, useLoyaltyStore } from "@/lib/store";
 
 const services = [
@@ -28,6 +29,12 @@ export function HomeScreen() {
   const walletBalance = useWalletStore((s) => s.balance);
   const { tier, points } = useLoyaltyStore();
   const tierEmoji = tier === "Bronze" ? "🥉" : tier === "Silver" ? "🥈" : tier === "Gold" ? "🥇" : "💎";
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+
+  useEffect(() => {
+    fetchRestaurants().then(setRestaurants);
+  }, []);
+
   const popularRestaurants = restaurants.filter((r) => !r.closed).slice(0, 2);
 
   return (

@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chip } from "@/components/Chip";
-import { stays } from "@/lib/data";
+import { fetchStays, type Stay } from "@/lib/data";
 
 const filters = ["All", "🏡 Self-Catering", "🛎️ B&B", "🏨 Boutique", "🏕️ Camping"];
 
 export default function StaysPage() {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [stays, setStays] = useState<Stay[]>([]);
+
+  useEffect(() => {
+    fetchStays().then(setStays);
+  }, []);
 
   const filtered =
     activeFilter === "All"

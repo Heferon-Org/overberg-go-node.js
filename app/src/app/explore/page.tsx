@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chip } from "@/components/Chip";
 import { useToastStore } from "@/lib/store";
-import { experiences } from "@/lib/data";
+import { fetchExperiences, type Experience } from "@/lib/data";
 
 const filters = ["All", "⛵ Sea", "🐕 Pets", "🏡 Stays", "🎣 Fishing", "🚴 Active"];
 
 export default function ExplorePage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const showToast = useToastStore((s) => s.show);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+
+  useEffect(() => {
+    fetchExperiences().then(setExperiences);
+  }, []);
 
   const sections = [...new Set(experiences.map((e) => e.section))];
 

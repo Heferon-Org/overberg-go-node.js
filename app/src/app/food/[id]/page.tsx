@@ -1,16 +1,28 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { restaurants, menusByRestaurant } from "@/lib/data";
+import { fetchRestaurant, fetchMenu, SEED_RESTAURANTS, type Restaurant, type MenuItem } from "@/lib/data";
 import { useCartStore, useToastStore } from "@/lib/store";
 
 export default function MenuPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const restaurant = restaurants.find((r) => r.id === id) || restaurants[0];
-  const allItems = menusByRestaurant[restaurant.id] || menusByRestaurant["harbour-cafe"] || [];
+  const [restaurant, setRestaurant] = useState<Restaurant>(SEED_RESTAURANTS[0]);
+  const [allItems, setAllItems] = useState<MenuItem[]>([]);
+  const [activeCat, setActiveCat] = useState<string>("Starters");
+
+  useEffect(() => {
+    fetchRestaurant(id).then((r) => {
+      if (r) setRestaurant(r);
+    });
+    fetchMenu(id).then((items) => {
+      setAllItems(items);
+      const firstCat = items[0]?.category;
+      if (firstCat) setActiveCat(firstCat);
+    });
+  }, [id]);
+
   const categories = [...new Set(allItems.map((i) => i.category))];
-  const [activeCat, setActiveCat] = useState(categories[0] || "Starters");
   const items = allItems.filter((i) => i.category === activeCat);
   const addItem = useCartStore((s) => s.addItem);
   const cartCount = useCartStore((s) => s.count);

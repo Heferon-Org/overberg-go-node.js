@@ -1,3 +1,9 @@
+// Data layer — async Supabase queries with static seed fallback.
+// Seed data is preserved (and used by app/supabase/seed.sql) so the app
+// keeps rendering when the database is empty or env vars are missing.
+
+import { createClient } from "@/lib/supabase/client";
+
 export interface Restaurant {
   id: string;
   name: string;
@@ -51,7 +57,18 @@ export interface Stay {
   tag: string;
 }
 
-export const restaurants: Restaurant[] = [
+export interface GroceryProduct {
+  id: string;
+  name: string;
+  emoji: string;
+  price: string;
+  discount?: string;
+}
+
+// ─────────────────────────────────────────────
+// Seed data (used as fallback + for seed.sql)
+// ─────────────────────────────────────────────
+export const SEED_RESTAURANTS: Restaurant[] = [
   { id: "harbour-cafe", name: "Harbour Café", emoji: "🦐", bg: "linear-gradient(160deg,#e4f5fa,#d4eef6)", rating: "4.8", reviews: 312, time: "20 min", deliveryFee: "R35", tag: "Seafood", subtitle: "Seafood platter · Calamari · Hake · Harbour views", location: "Struisbaai Harbour" },
   { id: "michael-collins", name: "Michael Collins Irish Pub", emoji: "🍺", bg: "linear-gradient(160deg,#f5efe4,#ede5d4)", rating: "4.5", reviews: 187, time: "25 min", deliveryFee: "R35", tag: "Irish Pub", subtitle: "Tapas · Burgers · Pizza · Beer garden" },
   { id: "fish-and-more", name: "Fish & More", emoji: "🐟", bg: "linear-gradient(160deg,#e4f5f0,#d6f0e8)", rating: "4.7", reviews: 243, time: "15 min", deliveryFee: "R25", tag: "Takeaway", subtitle: "Yellowtail · Snoek · Hake · Fresh daily catch", location: "66 Main Road" },
@@ -63,7 +80,7 @@ export const restaurants: Restaurant[] = [
   { id: "thirstys", name: "Thirsty's Pub", emoji: "🍟", bg: "linear-gradient(160deg,#f5efe4,#ede5d4)", rating: "4.2", reviews: 112, time: "22 min", deliveryFee: "R30", tag: "Grill & Pub", subtitle: "Pool tables · Fresh pub food · Cold beer · Local favourite" },
 ];
 
-export const menusByRestaurant: Record<string, MenuItem[]> = {
+export const SEED_MENUS: Record<string, MenuItem[]> = {
   "harbour-cafe": [
     { id: "hc-1", name: "Calamari Rings", description: "Lightly battered, with tartare sauce.", price: 89, emoji: "🍤", category: "Starters" },
     { id: "hc-2", name: "Prawn Cocktail", description: "Tiger prawns, lettuce, Marie Rose sauce", price: 110, emoji: "🥗", category: "Starters" },
@@ -95,7 +112,7 @@ export const menusByRestaurant: Record<string, MenuItem[]> = {
   ],
 };
 
-export const experiences: Experience[] = [
+export const SEED_EXPERIENCES: Experience[] = [
   { id: "sea-adventures", name: "Southern Tip Sea Adventures", description: "Boat trips from Struisbaai Harbour — whale watching, seal colonies, sunsets, birding tours. PADI dive centre on-site.", emoji: "⛵", bg: "linear-gradient(160deg,#e4f5fa,#d0ecf5)", badge: "★ 4.9 · Sold out weekends", duration: "2–4 hrs · from", price: "R380/pax", buttonText: "Book Now", section: "On the Water", sectionColor: "text-sea", sectionEmoji: "⛵" },
   { id: "fishing-charters", name: "Awesome Charters — Saltwater Fishing", description: "Deep sea & surf fishing at the southernmost tip of Africa. Yellowtail, snoek, tuna. All tackle provided.", emoji: "🎣", bg: "linear-gradient(160deg,#dceef8,#cfe6f2)", badge: "★ 4.8", duration: "Half or full day", price: "R650/pax", buttonText: "Book Now", section: "On the Water", sectionColor: "text-sea", sectionEmoji: "⛵" },
   { id: "dive-struisbaai", name: "Dive Struisbaai — Scuba & Snorkelling", description: "PADI dive courses, snorkelling experiences, and underwater guided tours. Warm Indian Ocean, visibility up to 12m.", emoji: "🤿", bg: "linear-gradient(160deg,#e0f2fa,#d2ebf5)", badge: "★ 4.7 · PADI Certified", duration: "3 hrs · from", price: "R420/pax", buttonText: "Book Now", section: "On the Water", sectionColor: "text-sea", sectionEmoji: "⛵" },
@@ -111,7 +128,7 @@ export const experiences: Experience[] = [
   { id: "wine-route", name: "Cape Agulhas Wine Route Tour", description: "Cool-climate Elim wines. Unique terroir exciting winemakers worldwide. Guided tastings, cellar tours, picnics. Private transfer included.", emoji: "🍷", bg: "linear-gradient(160deg,#f8e8f0,#f2dce8)", badge: "★ 4.8 · Award-winning", duration: "Half day · from", price: "R450/pax", buttonText: "Book Now", section: "Agulhas Wine Route", sectionColor: "text-coral", sectionEmoji: "🍷" },
 ];
 
-export const stays: Stay[] = [
+export const SEED_STAYS: Stay[] = [
   { id: "chateau-marine", name: "Chateau de Marine Boutique Hotel", description: "9 luxury sea-facing rooms, private pool, 50m from beach. Voted best boutique stay in the Overberg.", emoji: "🌊", bg: "linear-gradient(160deg,#e4f5fa,#d4eef6)", location: "Struisbaai", rating: "4.9", meta: "🛏️ 9 rooms · 🏖️ Sea view", price: "R2,800/night", tag: "Boutique" },
   { id: "agulhas-lodge", name: "Agulhas Country Lodge", description: "Built from local limestone, blends into a hill overlooking both oceans. All rooms with sea views. Breakfast included.", emoji: "🌿", bg: "linear-gradient(160deg,#e8f7ef,#dcf0e3)", location: "L'Agulhas", rating: "4.8", meta: "🛏️ B&B · 🌅 Ocean view", price: "R1,800/night", tag: "B&B" },
   { id: "arniston-hotel", name: "The Arniston Hotel", description: "Historic hotel in a national monument village. Steps from Kassiesbaai. Pool, restaurant, private beach access.", emoji: "⛵", bg: "linear-gradient(160deg,#f5efe4,#ede5d4)", location: "Arniston", rating: "4.9", meta: "🛏️ 12 rooms · 🍽️ Restaurant", price: "R2,200/night", tag: "Boutique" },
@@ -131,7 +148,7 @@ export const groceryCategories = [
   { emoji: "🐾", name: "Pets" },
 ];
 
-export const groceryProducts = [
+export const SEED_GROCERY_PRODUCTS: GroceryProduct[] = [
   { id: "pnp-1", name: "Beef Braai Pack 1kg", emoji: "🥩", price: "R89.99", discount: "-30%" },
   { id: "pnp-2", name: "Cheddar 400g", emoji: "🧀", price: "R39.99", discount: "-20%" },
   { id: "pnp-3", name: "Free Range Eggs 6pk", emoji: "🥚", price: "R32.99" },
@@ -141,3 +158,211 @@ export const groceryProducts = [
   { id: "pnp-7", name: "Broccoli Head", emoji: "🥦", price: "R19.99" },
   { id: "pnp-8", name: "Navel Oranges 1.5kg", emoji: "🍊", price: "R24.99", discount: "-25%" },
 ];
+
+// ─────────────────────────────────────────────
+// Supabase availability check
+// ─────────────────────────────────────────────
+function hasSupabase(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
+
+// ─────────────────────────────────────────────
+// Mappers (Supabase row → UI shape)
+// ─────────────────────────────────────────────
+type RestaurantRow = {
+  slug: string;
+  name: string;
+  emoji: string | null;
+  bg_gradient: string | null;
+  rating: number;
+  review_count: number;
+  delivery_time: string | null;
+  delivery_fee: number;
+  tag: string | null;
+  subtitle: string | null;
+  location: string | null;
+  is_open: boolean;
+};
+
+function mapRestaurant(row: RestaurantRow): Restaurant {
+  return {
+    id: row.slug,
+    name: row.name,
+    emoji: row.emoji ?? "🍽️",
+    bg: row.bg_gradient ?? "linear-gradient(160deg,#f0f1f4,#e5e7eb)",
+    rating: row.rating.toFixed(1),
+    reviews: row.review_count,
+    time: row.delivery_time ?? "30 min",
+    deliveryFee: `R${Math.round(row.delivery_fee)}`,
+    tag: row.tag ?? "",
+    subtitle: row.subtitle ?? "",
+    location: row.location ?? undefined,
+    closed: !row.is_open,
+  };
+}
+
+type MenuItemRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  emoji: string | null;
+  category: string;
+};
+
+function mapMenuItem(row: MenuItemRow): MenuItem {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description ?? "",
+    price: Number(row.price),
+    emoji: row.emoji ?? "🍽️",
+    category: row.category,
+  };
+}
+
+type ExperienceRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  emoji: string | null;
+  bg_gradient: string | null;
+  badge: string | null;
+  duration: string | null;
+  price: string | null;
+  button_text: string;
+  section: string;
+  section_color: string | null;
+  section_emoji: string | null;
+};
+
+function mapExperience(row: ExperienceRow): Experience {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description ?? "",
+    emoji: row.emoji ?? "✨",
+    bg: row.bg_gradient ?? "linear-gradient(160deg,#f0f1f4,#e5e7eb)",
+    badge: row.badge ?? "",
+    duration: row.duration ?? "",
+    price: row.price ?? "",
+    buttonText: row.button_text,
+    section: row.section,
+    sectionColor: row.section_color ?? "text-primary",
+    sectionEmoji: row.section_emoji ?? "✨",
+  };
+}
+
+type StayRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  emoji: string | null;
+  bg_gradient: string | null;
+  location: string | null;
+  rating: number | null;
+  meta: string | null;
+  price: string | null;
+  tag: string | null;
+};
+
+function mapStay(row: StayRow): Stay {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description ?? "",
+    emoji: row.emoji ?? "🏠",
+    bg: row.bg_gradient ?? "linear-gradient(160deg,#f0f1f4,#e5e7eb)",
+    location: row.location ?? "",
+    rating: row.rating?.toFixed(1) ?? "0.0",
+    meta: row.meta ?? "",
+    price: row.price ?? "",
+    tag: row.tag ?? "",
+  };
+}
+
+// ─────────────────────────────────────────────
+// Async fetchers (Supabase first, seed fallback)
+// ─────────────────────────────────────────────
+export async function fetchRestaurants(): Promise<Restaurant[]> {
+  if (!hasSupabase()) return SEED_RESTAURANTS;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("restaurants")
+      .select("slug, name, emoji, bg_gradient, rating, review_count, delivery_time, delivery_fee, tag, subtitle, location, is_open")
+      .order("rating", { ascending: false });
+    if (error || !data || data.length === 0) return SEED_RESTAURANTS;
+    return data.map((row) => mapRestaurant(row as RestaurantRow));
+  } catch {
+    return SEED_RESTAURANTS;
+  }
+}
+
+export async function fetchRestaurant(slug: string): Promise<Restaurant | null> {
+  const all = await fetchRestaurants();
+  return all.find((r) => r.id === slug) ?? null;
+}
+
+export async function fetchMenu(restaurantSlug: string): Promise<MenuItem[]> {
+  if (!hasSupabase()) return SEED_MENUS[restaurantSlug] ?? [];
+  try {
+    const supabase = createClient();
+    const { data: restaurantRows } = await supabase
+      .from("restaurants")
+      .select("id")
+      .eq("slug", restaurantSlug)
+      .limit(1);
+    const restaurantId = (restaurantRows as { id: string }[] | null)?.[0]?.id;
+    if (!restaurantId) return SEED_MENUS[restaurantSlug] ?? [];
+
+    const { data, error } = await supabase
+      .from("menu_items")
+      .select("id, name, description, price, emoji, category")
+      .eq("restaurant_id", restaurantId)
+      .eq("available", true)
+      .order("sort_order", { ascending: true });
+    if (error || !data || data.length === 0) return SEED_MENUS[restaurantSlug] ?? [];
+    return data.map((row) => mapMenuItem(row as MenuItemRow));
+  } catch {
+    return SEED_MENUS[restaurantSlug] ?? [];
+  }
+}
+
+export async function fetchExperiences(): Promise<Experience[]> {
+  if (!hasSupabase()) return SEED_EXPERIENCES;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("experiences")
+      .select("id, name, description, emoji, bg_gradient, badge, duration, price, button_text, section, section_color, section_emoji")
+      .eq("available", true);
+    if (error || !data || data.length === 0) return SEED_EXPERIENCES;
+    return data.map((row) => mapExperience(row as ExperienceRow));
+  } catch {
+    return SEED_EXPERIENCES;
+  }
+}
+
+export async function fetchStays(): Promise<Stay[]> {
+  if (!hasSupabase()) return SEED_STAYS;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("stays")
+      .select("id, name, description, emoji, bg_gradient, location, rating, meta, price, tag")
+      .eq("available", true);
+    if (error || !data || data.length === 0) return SEED_STAYS;
+    return data.map((row) => mapStay(row as StayRow));
+  } catch {
+    return SEED_STAYS;
+  }
+}
+
+export async function fetchGroceryProducts(): Promise<GroceryProduct[]> {
+  // Grocery products are not yet a Supabase table — TODO Phase 3 (PnP integration).
+  return SEED_GROCERY_PRODUCTS;
+}

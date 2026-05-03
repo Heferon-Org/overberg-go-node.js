@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { Chip } from "@/components/Chip";
-import { restaurants } from "@/lib/data";
+import { fetchRestaurants, type Restaurant } from "@/lib/data";
 
 const filters = ["🍽️ All", "🐟 Seafood", "🍕 Italian", "🍺 Pub", "☕ Café", "🇿🇦 SA"];
 
 export default function FoodPage() {
   const [activeFilter, setActiveFilter] = useState("🍽️ All");
   const [search, setSearch] = useState("");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+
+  useEffect(() => {
+    fetchRestaurants().then(setRestaurants);
+  }, []);
 
   const filtered = restaurants.filter((r) => {
     if (search) {

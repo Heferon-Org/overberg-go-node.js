@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useFavoritesStore, useToastStore } from "@/lib/store";
-import { restaurants, experiences, stays } from "@/lib/data";
+import {
+  fetchRestaurants,
+  fetchExperiences,
+  fetchStays,
+  type Restaurant,
+  type Experience,
+  type Stay,
+} from "@/lib/data";
 
 const tabs = ["Restaurants", "Experiences", "Stays"];
 
@@ -12,6 +19,20 @@ export default function FavoritesPage() {
   const { restaurantIds, experienceIds, stayIds, toggleRestaurant, toggleExperience, toggleStay } =
     useFavoritesStore();
   const showToast = useToastStore((s) => s.show);
+
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [stays, setStays] = useState<Stay[]>([]);
+
+  useEffect(() => {
+    Promise.all([fetchRestaurants(), fetchExperiences(), fetchStays()]).then(
+      ([r, e, s]) => {
+        setRestaurants(r);
+        setExperiences(e);
+        setStays(s);
+      }
+    );
+  }, []);
 
   const favRestaurants = restaurants.filter((r) => restaurantIds.includes(r.id));
   const favExperiences = experiences.filter((e) => experienceIds.includes(e.id));
