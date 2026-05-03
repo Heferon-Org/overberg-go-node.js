@@ -12,6 +12,7 @@
     "@serwist/next": "^9.5.7",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
+    "firebase": "^12.12.1",
     "mapbox-gl": "^3.23.0",
     "next": "16.2.2",
     "react": "19.2.4",

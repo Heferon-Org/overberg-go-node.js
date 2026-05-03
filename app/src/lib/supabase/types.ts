@@ -12,6 +12,10 @@ export type Database = {
           area: string;
           smart_shopper_points: number;
           wallet_balance: number;
+          fcm_token: string | null;
+          email_notifications: boolean;
+          sms_notifications: boolean;
+          push_notifications: boolean;
           created_at: string;
           updated_at: string;
         };
