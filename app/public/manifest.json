@@ -1,12 +1,13 @@
 {
   "name": "OverBerg Go",
   "short_name": "OverBerg Go",
-  "description": "Food, rides, experiences & more in the Overberg region",
+  "description": "Food, rides, pharmacy, parcels, laundry, home services & more in the Overberg",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#1E9E5A",
   "orientation": "portrait",
+  "categories": ["food", "shopping", "lifestyle", "utilities"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -19,6 +20,32 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Order Food",
+      "short_name": "Food",
+      "url": "/food",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Book a Ride",
+      "short_name": "Ride",
+      "url": "/ride",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pharmacy",
+      "short_name": "Pharmacy",
+      "url": "/pharmacy",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Send Parcel",
+      "short_name": "Parcels",
+      "url": "/parcels/new",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

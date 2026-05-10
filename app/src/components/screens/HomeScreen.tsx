@@ -6,6 +6,7 @@ import { AreaSelector } from "@/components/AreaSelector";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { fetchRestaurants, type Restaurant } from "@/lib/data";
 import { useWalletStore, useLoyaltyStore } from "@/lib/store";
+import { DedicatedAppCTA } from "@/components/DedicatedAppCTA";
 
 const services = [
   { label: "Food", emoji: "🍽️", href: "/food", bg: "rgba(232,80,58,0.12)", border: "rgba(232,80,58,0.25)" },
@@ -160,6 +161,9 @@ export function HomeScreen() {
           ))}
         </div>
       </div>
+
+      {/* Dedicated app CTA for drivers/vendors/providers */}
+      <DedicatedAppCTA />
 
       {/* Popular */}
       <div className="px-[18px] pb-5">
