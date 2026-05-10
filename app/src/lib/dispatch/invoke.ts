@@ -2,7 +2,7 @@
  * Server-side helper to invoke the `dispatch-order` Supabase Edge Function.
  * Call this immediately after marking an order `confirmed`.
  */
-export async function invokeDispatch(orderId: string): Promise<{ ok: boolean; error?: string }> {
+export async function invokeDispatch(orderId: string, serviceType?: string): Promise<{ ok: boolean; error?: string }> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const secret = process.env.DISPATCH_SECRET;
@@ -21,7 +21,7 @@ export async function invokeDispatch(orderId: string): Promise<{ ok: boolean; er
     const res = await fetch(`${url}/functions/v1/dispatch-order`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ order_id: orderId }),
+      body: JSON.stringify({ order_id: orderId, service_type: serviceType }),
     });
     if (!res.ok) {
       const text = await res.text();

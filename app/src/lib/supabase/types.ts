@@ -1,3 +1,7 @@
+export type MerchantType = "restaurant" | "pharmacy" | "laundry" | "grocery";
+
+export type ServiceType = "food" | "grocery" | "ride" | "pharmacy" | "parcel" | "laundry" | "home_service";
+
 export type Database = {
   public: {
     Tables: {
@@ -44,10 +48,43 @@ export type Database = {
           owner_id: string | null;
           latitude: number | null;
           longitude: number | null;
+          merchant_type: MerchantType;
+          service_types: ServiceType[];
+          metadata: Record<string, unknown>;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["restaurants"]["Row"]> & { name: string; slug: string };
         Update: Partial<Database["public"]["Tables"]["restaurants"]["Row"]>;
+      };
+      merchants: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          emoji: string | null;
+          image_url: string | null;
+          bg_gradient: string | null;
+          rating: number;
+          review_count: number;
+          delivery_time: string | null;
+          delivery_fee: number;
+          tag: string | null;
+          subtitle: string | null;
+          location: string | null;
+          area: string;
+          is_open: boolean;
+          opens_at: string | null;
+          closes_at: string | null;
+          owner_id: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          merchant_type: MerchantType;
+          service_types: ServiceType[];
+          metadata: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["merchants"]["Row"]> & { name: string; slug: string };
+        Update: Partial<Database["public"]["Tables"]["merchants"]["Row"]>;
       };
       menu_items: {
         Row: {
@@ -76,7 +113,7 @@ export type Database = {
           id: string;
           order_number: string;
           customer_id: string;
-          restaurant_id: string;
+          restaurant_id: string | null;
           driver_id: string | null;
           items: OrderItem[];
           subtotal: number;
@@ -96,12 +133,14 @@ export type Database = {
           notes: string | null;
           estimated_delivery: string | null;
           delivered_at: string | null;
+          service_type: ServiceType;
+          service_payload: Record<string, unknown>;
+          scheduled_for: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["orders"]["Row"]> & {
           customer_id: string;
-          restaurant_id: string;
           items: OrderItem[];
           subtotal: number;
           total: number;
@@ -122,6 +161,7 @@ export type Database = {
           acceptance_rate: number;
           completion_rate: number;
           kyc_status: "pending" | "verified" | "rejected" | "suspended";
+          service_capabilities: ServiceType[];
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["drivers"]["Row"]> & { id: string };
@@ -422,6 +462,23 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["kyc_documents"]["Row"]>;
       };
+      prescriptions: {
+        Row: {
+          id: string;
+          order_id: string | null;
+          customer_id: string;
+          image_url: string;
+          verified_by: string | null;
+          verified_at: string | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["prescriptions"]["Row"]> & {
+          customer_id: string;
+          image_url: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["prescriptions"]["Row"]>;
+      };
       user_push_tokens: {
         Row: {
           id: string;
@@ -498,3 +555,5 @@ export type SupportTicket = Database["public"]["Tables"]["support_tickets"]["Row
 export type KycDocument = Database["public"]["Tables"]["kyc_documents"]["Row"];
 export type WalletTransaction = Database["public"]["Tables"]["wallet_transactions"]["Row"];
 export type UserPushToken = Database["public"]["Tables"]["user_push_tokens"]["Row"];
+export type Prescription = Database["public"]["Tables"]["prescriptions"]["Row"];
+export type Merchant = Database["public"]["Tables"]["restaurants"]["Row"];
