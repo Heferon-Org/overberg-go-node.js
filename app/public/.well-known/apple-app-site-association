@@ -1,0 +1,41 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.co.za.overberggo.app",
+        "paths": [
+          "/orders/*",
+          "/food/*",
+          "/ride/*",
+          "/groceries/*",
+          "/pharmacy/*",
+          "/parcels/*",
+          "/laundry/*",
+          "/services/*",
+          "/wallet/*",
+          "/cart",
+          "/profile",
+          "/auth"
+        ]
+      },
+      {
+        "appID": "TEAMID.co.za.overberggo.driver",
+        "paths": [
+          "/driver/*"
+        ]
+      },
+      {
+        "appID": "TEAMID.co.za.overberggo.vendor",
+        "paths": [
+          "/vendor/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.co.za.overberggo.app"
+    ]
+  }
+}

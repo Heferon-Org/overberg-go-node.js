@@ -7,6 +7,7 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { AddToHomeScreen } from "@/components/AddToHomeScreen";
 import { Providers } from "@/components/Providers";
+import { CapacitorInit } from "@/components/CapacitorInit";
 
 export const metadata: Metadata = {
   title: "OverBerg Go",
@@ -51,6 +52,7 @@ export default function RootLayout({
           <AddToHomeScreen />
           <SplashScreen />
           <ServiceWorkerRegistrar />
+          <CapacitorInit />
         </Providers>
       </body>
     </html>

@@ -7,6 +7,7 @@
 import { sendPushToUser } from "./fcm";
 import { sendSmsToUser } from "./sms";
 import { sendEmailToUser } from "./email";
+import { sendNativePushToUser } from "./native-push-server";
 import type { NotificationTemplate } from "./templates";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +16,7 @@ type AdminClient = any;
 export interface NotifyOptions {
   userId: string;
   template: NotificationTemplate;
-  channels?: ("push" | "sms" | "email")[];
+  channels?: ("push" | "sms" | "email" | "native_push")[];
   data?: Record<string, string>;
 }
 
@@ -24,11 +25,12 @@ export interface NotifyResult {
   push: boolean;
   sms: boolean;
   email: boolean;
+  nativePush: boolean;
 }
 
 export async function notify(admin: AdminClient, opts: NotifyOptions): Promise<NotifyResult> {
-  const channels = opts.channels || ["push", "sms", "email"];
-  const result: NotifyResult = { inApp: false, push: false, sms: false, email: false };
+  const channels = opts.channels || ["push", "sms", "email", "native_push"];
+  const result: NotifyResult = { inApp: false, push: false, sms: false, email: false, nativePush: false };
 
   // Always write to notifications table (in-app)
   const { error: dbErr } = await admin.from("notifications").insert({
@@ -68,6 +70,14 @@ export async function notify(admin: AdminClient, opts: NotifyOptions): Promise<N
     );
   }
 
+  if (channels.includes("native_push")) {
+    promises.push(
+      sendNativePushToUser(admin, opts.userId, opts.template.title, opts.template.body, opts.data)
+        .then((r) => { result.nativePush = r.ok; })
+        .catch(() => { result.nativePush = false; })
+    );
+  }
+
   await Promise.allSettled(promises);
   return result;
 }
@@ -75,5 +85,6 @@ export async function notify(admin: AdminClient, opts: NotifyOptions): Promise<N
 export { sendPush, sendPushToUser } from "./fcm";
 export { sendSms, sendSmsToUser } from "./sms";
 export { sendEmail, sendEmailToUser } from "./email";
+export { sendNativePushToUser } from "./native-push-server";
 export { getOrderTemplate, getDriverAssignedTemplate, getWelcomeTemplate, getWeeklyStatementTemplate } from "./templates";
 export type { NotificationTemplate } from "./templates";

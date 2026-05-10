@@ -422,6 +422,21 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["kyc_documents"]["Row"]>;
       };
+      user_push_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          token: string;
+          platform: "ios" | "android";
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["user_push_tokens"]["Row"]> & {
+          user_id: string;
+          token: string;
+          platform: "ios" | "android";
+        };
+        Update: Partial<Database["public"]["Tables"]["user_push_tokens"]["Row"]>;
+      };
       whatsapp_conversations: {
         Row: {
           id: string;
@@ -482,3 +497,4 @@ export type PromoCode = Database["public"]["Tables"]["promo_codes"]["Row"];
 export type SupportTicket = Database["public"]["Tables"]["support_tickets"]["Row"];
 export type KycDocument = Database["public"]["Tables"]["kyc_documents"]["Row"];
 export type WalletTransaction = Database["public"]["Tables"]["wallet_transactions"]["Row"];
+export type UserPushToken = Database["public"]["Tables"]["user_push_tokens"]["Row"];

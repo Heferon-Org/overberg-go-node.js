@@ -12,6 +12,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const origin = request.headers.get("origin") || "";
+  const capacitorOrigins = ["capacitor://localhost", "ionic://localhost", "http://localhost"];
+  if (capacitorOrigins.some((o) => origin.startsWith(o))) {
+    const response = NextResponse.next();
+    response.headers.set("Access-Control-Allow-Origin", origin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    response.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type,Authorization,X-App-Target");
+    if (request.method === "OPTIONS") {
+      return new NextResponse(null, { status: 204, headers: response.headers });
+    }
+  }
+
   const { pathname } = request.nextUrl;
 
   const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));

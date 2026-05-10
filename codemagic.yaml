@@ -1,0 +1,270 @@
+workflows:
+  ios-customer:
+    name: iOS Customer App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - ios_signing
+        - app_config
+      vars:
+        APP_TARGET: customer
+        BUNDLE_ID: co.za.overberggo.app
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: co.za.overberggo.app
+      node: 20.11.0
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*-native-customer"
+    scripts:
+      - name: Install dependencies
+        script: cd app && npm ci
+      - name: Install CocoaPods
+        script: cd app/ios/App && pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build iOS
+        script: |
+          cd app/ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive
+      - name: Export IPA
+        script: |
+          cd app/ios/App
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath build/export
+    artifacts:
+      - app/ios/App/build/export/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  android-customer:
+    name: Android Customer App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - android_signing
+        - app_config
+      vars:
+        APP_TARGET: customer
+        BUNDLE_ID: co.za.overberggo.app
+      android_signing:
+        - overberggo_keystore
+      node: 20.11.0
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*-native-customer"
+    scripts:
+      - name: Install dependencies
+        script: cd app && npm ci
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > app/android/app/keystore.jks
+      - name: Build Android
+        script: |
+          cd app/android
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/keystore.jks \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+    artifacts:
+      - app/android/app/build/outputs/**/*.apk
+      - app/android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+  ios-driver:
+    name: iOS Driver App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - ios_signing
+        - app_config
+      vars:
+        APP_TARGET: driver
+        BUNDLE_ID: co.za.overberggo.driver
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: co.za.overberggo.driver
+      node: 20.11.0
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*-native-driver"
+    scripts:
+      - name: Install dependencies
+        script: cd app && npm ci
+      - name: Install CocoaPods
+        script: cd app/ios/App && pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build iOS
+        script: |
+          cd app/ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive
+      - name: Export IPA
+        script: |
+          cd app/ios/App
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath build/export
+    artifacts:
+      - app/ios/App/build/export/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  android-driver:
+    name: Android Driver App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - android_signing
+        - app_config
+      vars:
+        APP_TARGET: driver
+        BUNDLE_ID: co.za.overberggo.driver
+      android_signing:
+        - overberggo_keystore
+      node: 20.11.0
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*-native-driver"
+    scripts:
+      - name: Install dependencies
+        script: cd app && npm ci
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > app/android/app/keystore.jks
+      - name: Build Android
+        script: |
+          cd app/android
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/keystore.jks \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+    artifacts:
+      - app/android/app/build/outputs/**/*.apk
+      - app/android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+  ios-vendor:
+    name: iOS Vendor App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - ios_signing
+        - app_config
+      vars:
+        APP_TARGET: vendor
+        BUNDLE_ID: co.za.overberggo.vendor
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: co.za.overberggo.vendor
+      node: 20.11.0
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*-native-vendor"
+    scripts:
+      - name: Install dependencies
+        script: cd app && npm ci
+      - name: Install CocoaPods
+        script: cd app/ios/App && pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build iOS
+        script: |
+          cd app/ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive
+      - name: Export IPA
+        script: |
+          cd app/ios/App
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath build/export
+    artifacts:
+      - app/ios/App/build/export/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  android-vendor:
+    name: Android Vendor App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - android_signing
+        - app_config
+      vars:
+        APP_TARGET: vendor
+        BUNDLE_ID: co.za.overberggo.vendor
+      android_signing:
+        - overberggo_keystore
+      node: 20.11.0
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: "v*-native-vendor"
+    scripts:
+      - name: Install dependencies
+        script: cd app && npm ci
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > app/android/app/keystore.jks
+      - name: Build Android
+        script: |
+          cd app/android
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/keystore.jks \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+    artifacts:
+      - app/android/app/build/outputs/**/*.apk
+      - app/android/app/build/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
