@@ -21,6 +21,7 @@ export function BottomNav() {
   if (
     pathname.startsWith("/driver") ||
     pathname.startsWith("/vendor") ||
+    pathname.startsWith("/provider") ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/cart") ||
     pathname.startsWith("/chat") ||

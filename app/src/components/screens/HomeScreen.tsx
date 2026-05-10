@@ -11,11 +11,15 @@ const services = [
   { label: "Food", emoji: "🍽️", href: "/food", bg: "rgba(232,80,58,0.12)", border: "rgba(232,80,58,0.25)" },
   { label: "Ride", emoji: "🚗", href: "/ride", bg: "rgba(30,158,90,0.12)", border: "rgba(30,158,90,0.3)" },
   { label: "Groceries", emoji: "🛒", href: "/groceries", bg: "rgba(204,31,26,0.12)", border: "rgba(204,31,26,0.25)", badge: "PnP" },
+  { label: "Pharmacy", emoji: "💊", href: "/pharmacy", bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.25)" },
+  { label: "Parcels", emoji: "📦", href: "/parcels", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)" },
+  { label: "Laundry", emoji: "👔", href: "/laundry", bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.25)" },
+  { label: "Services", emoji: "🔧", href: "/services", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.25)" },
   { label: "Go to Sea", emoji: "⚓", href: "/explore", bg: "rgba(14,158,194,0.12)", border: "rgba(14,158,194,0.3)" },
   { label: "Guest Houses", emoji: "🏡", href: "/stays", bg: "rgba(30,158,90,0.12)", border: "rgba(30,158,90,0.2)" },
   { label: "Dog Walker", emoji: "🐕", href: "/explore", bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.2)" },
   { label: "Fresh Fish", emoji: "🐟", href: "/explore", bg: "rgba(14,122,153,0.15)", border: "rgba(14,158,194,0.25)" },
-  { label: "Services", emoji: "🔧", href: "/services", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.25)" },
+  { label: "More", emoji: "➕", href: "/explore", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.25)" },
 ];
 
 const promos = [
@@ -72,7 +76,7 @@ export function HomeScreen() {
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
-          <span className="text-sm text-t3">Food, rides, experiences...</span>
+          <span className="text-sm text-t3">Food, rides, pharmacy, services...</span>
         </Link>
       </div>
 

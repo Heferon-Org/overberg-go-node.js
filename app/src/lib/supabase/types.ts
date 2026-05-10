@@ -11,7 +11,7 @@ export type Database = {
           full_name: string | null;
           phone: string | null;
           avatar_url: string | null;
-          role: "customer" | "driver" | "vendor" | "admin";
+          role: "customer" | "driver" | "vendor" | "admin" | "provider";
           address: string | null;
           area: string;
           smart_shopper_points: number;
