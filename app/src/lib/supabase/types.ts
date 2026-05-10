@@ -462,6 +462,52 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["kyc_documents"]["Row"]>;
       };
+      service_requests: {
+        Row: {
+          id: string;
+          customer_id: string;
+          category: string;
+          title: string;
+          description: string | null;
+          photos: string[];
+          latitude: number | null;
+          longitude: number | null;
+          address: string | null;
+          budget_min_cents: number;
+          budget_max_cents: number;
+          scheduled_for: string | null;
+          status: "open" | "bidding" | "accepted" | "in_progress" | "completed" | "cancelled";
+          accepted_bid_id: string | null;
+          bidding_closes_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["service_requests"]["Row"]> & {
+          customer_id: string;
+          category: string;
+          title: string;
+          budget_max_cents: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["service_requests"]["Row"]>;
+      };
+      service_bids: {
+        Row: {
+          id: string;
+          request_id: string;
+          provider_id: string;
+          amount_cents: number;
+          message: string | null;
+          eta_hours: number | null;
+          status: "pending" | "accepted" | "rejected" | "withdrawn";
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["service_bids"]["Row"]> & {
+          request_id: string;
+          provider_id: string;
+          amount_cents: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["service_bids"]["Row"]>;
+      };
       prescriptions: {
         Row: {
           id: string;
@@ -557,3 +603,5 @@ export type WalletTransaction = Database["public"]["Tables"]["wallet_transaction
 export type UserPushToken = Database["public"]["Tables"]["user_push_tokens"]["Row"];
 export type Prescription = Database["public"]["Tables"]["prescriptions"]["Row"];
 export type Merchant = Database["public"]["Tables"]["restaurants"]["Row"];
+export type ServiceRequest = Database["public"]["Tables"]["service_requests"]["Row"];
+export type ServiceBidRow = Database["public"]["Tables"]["service_bids"]["Row"];

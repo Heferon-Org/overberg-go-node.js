@@ -1,114 +1,118 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { useToastStore } from "@/lib/store";
 
-const serviceCategories = [
-  {
-    title: "Home Services",
-    emoji: "🏠",
-    services: [
-      { id: "cleaning", name: "Home Cleaning", emoji: "🧹", price: "From R250", desc: "Deep clean, regular cleaning", bg: "rgba(30,158,90,0.12)", border: "rgba(30,158,90,0.25)" },
-      { id: "laundry", name: "Laundry & Ironing", emoji: "👔", price: "From R120", desc: "Wash, dry, fold, iron", bg: "rgba(14,158,194,0.12)", border: "rgba(14,158,194,0.25)" },
-      { id: "handyman", name: "Handyman", emoji: "🔧", price: "From R200/hr", desc: "Repairs, installations, assembly", bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.25)" },
-      { id: "electrician", name: "Electrician", emoji: "⚡", price: "From R350", desc: "Licensed electrician callout", bg: "rgba(232,80,58,0.12)", border: "rgba(232,80,58,0.25)" },
-      { id: "plumber", name: "Plumber", emoji: "🔧", price: "From R300", desc: "Leaks, geysers, drains", bg: "rgba(14,158,194,0.12)", border: "rgba(14,158,194,0.25)" },
-      { id: "garden", name: "Garden Service", emoji: "🌱", price: "From R180", desc: "Mowing, trimming, landscaping", bg: "rgba(30,158,90,0.12)", border: "rgba(30,158,90,0.25)" },
-    ],
-  },
-  {
-    title: "Vehicle",
-    emoji: "🚗",
-    services: [
-      { id: "carwash", name: "Car Wash & Detail", emoji: "🚿", price: "From R80", desc: "Mobile wash at your door", bg: "rgba(14,158,194,0.12)", border: "rgba(14,158,194,0.25)" },
-      { id: "mechanic", name: "Mobile Mechanic", emoji: "🔩", price: "From R400", desc: "Basic repairs, diagnostics", bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.25)" },
-      { id: "towing", name: "Tow Truck", emoji: "🚛", price: "From R500", desc: "24/7 breakdown recovery", bg: "rgba(232,80,58,0.12)", border: "rgba(232,80,58,0.25)" },
-    ],
-  },
-  {
-    title: "Personal",
-    emoji: "💆",
-    services: [
-      { id: "massage", name: "Massage & Spa", emoji: "💆", price: "From R350", desc: "Mobile massage therapist", bg: "rgba(168,85,247,0.12)", border: "rgba(168,85,247,0.25)" },
-      { id: "trainer", name: "Personal Trainer", emoji: "💪", price: "From R200", desc: "Beach/outdoor fitness sessions", bg: "rgba(30,158,90,0.12)", border: "rgba(30,158,90,0.25)" },
-      { id: "photography", name: "Photography", emoji: "📸", price: "From R500", desc: "Events, portraits, aerial drone", bg: "rgba(14,158,194,0.12)", border: "rgba(14,158,194,0.25)" },
-      { id: "tutor", name: "Tutoring", emoji: "📚", price: "From R150/hr", desc: "Maths, science, languages", bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.25)" },
-    ],
-  },
-  {
-    title: "Delivery & Moving",
-    emoji: "📦",
-    services: [
-      { id: "courier", name: "Same-Day Courier", emoji: "📮", price: "From R45", desc: "Send packages locally", bg: "rgba(232,80,58,0.12)", border: "rgba(232,80,58,0.25)" },
-      { id: "moving", name: "Moving & Furniture", emoji: "📦", price: "From R800", desc: "Bakkie hire, removals", bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.25)" },
-    ],
-  },
+type MyRequest = {
+  id: string;
+  category: string;
+  title: string;
+  status: string;
+  budget_max_cents: number;
+  created_at: string;
+};
+
+const CATEGORIES = [
+  { value: "plumber", emoji: "🔧", label: "Plumber" },
+  { value: "electrician", emoji: "⚡", label: "Electrician" },
+  { value: "painter", emoji: "🎨", label: "Painter" },
+  { value: "gardener", emoji: "🌱", label: "Gardener" },
+  { value: "cleaner", emoji: "🧹", label: "Cleaner" },
+  { value: "handyman", emoji: "🔨", label: "Handyman" },
+  { value: "locksmith", emoji: "🔑", label: "Locksmith" },
+  { value: "pest_control", emoji: "🐛", label: "Pest Control" },
+  { value: "moving", emoji: "🚚", label: "Moving" },
+  { value: "appliance_repair", emoji: "🔌", label: "Appliance Repair" },
 ];
 
 export default function ServicesPage() {
-  const showToast = useToastStore((s) => s.show);
+  const router = useRouter();
+  const supabase = createClient();
+  const [myRequests, setMyRequests] = useState<MyRequest[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("service_requests")
+        .select("id, category, title, status, budget_max_cents, created_at")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (data) setMyRequests(data as MyRequest[]);
+    })();
+  }, [supabase]);
+
+  const getCategoryEmoji = (cat: string) => CATEGORIES.find((c) => c.value === cat)?.emoji || "🔧";
 
   return (
-    <div>
-      <div className="px-[18px] pt-3 pb-3.5">
-        <div className="flex items-center gap-2.5 mb-1">
-          <Link
-            href="/"
-            className="w-10 h-10 rounded-[14px] bg-dark3 border border-bd flex items-center justify-center text-lg shrink-0"
+    <div className="px-4 pt-6 pb-24">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-display font-bold">Home Services</h1>
+        <button
+          onClick={() => router.push("/services/post")}
+          className="px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold"
+        >
+          + Post Task
+        </button>
+      </div>
+      <p className="text-sm text-t3 mb-6">Find local pros — get competitive bids</p>
+
+      <div className="grid grid-cols-5 gap-3 mb-8">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.value}
+            onClick={() => router.push(`/services/post?category=${cat.value}`)}
+            className="flex flex-col items-center gap-1"
           >
-            ←
-          </Link>
-          <h1 className="font-heading font-black text-[22px] tracking-tight">
-            All <span className="text-primary">Services</span>
-          </h1>
-        </div>
-        <p className="text-xs text-t2 ml-[52px]">Book local services in the Overberg</p>
-      </div>
-
-      {/* Quick stats */}
-      <div className="flex gap-3 px-[18px] mb-4">
-        <div className="flex-1 bg-primary/[0.06] border border-primary/15 rounded-[16px] p-3 text-center">
-          <div className="font-heading font-black text-lg text-primary">15+</div>
-          <div className="text-[10px] text-t2 font-heading font-semibold">Services</div>
-        </div>
-        <div className="flex-1 bg-sea/[0.06] border border-sea/15 rounded-[16px] p-3 text-center">
-          <div className="font-heading font-black text-lg text-sea">4.8★</div>
-          <div className="text-[10px] text-t2 font-heading font-semibold">Avg Rating</div>
-        </div>
-        <div className="flex-1 bg-sun/[0.06] border border-sun/15 rounded-[16px] p-3 text-center">
-          <div className="font-heading font-black text-lg text-sun">30min</div>
-          <div className="text-[10px] text-t2 font-heading font-semibold">Avg Response</div>
-        </div>
-      </div>
-
-      <div className="px-[18px] pb-24">
-        {serviceCategories.map((cat) => (
-          <div key={cat.title} className="mb-5">
-            <h2 className="font-heading font-extrabold text-sm flex items-center gap-1.5 mb-3">
-              {cat.emoji} {cat.title}
-            </h2>
-            <div className="grid grid-cols-2 gap-2.5">
-              {cat.services.map((svc) => (
-                <button
-                  key={svc.id}
-                  onClick={() => showToast(`✓ ${svc.name} — booking coming soon`)}
-                  className="bg-dark2 border border-bd rounded-[16px] p-3.5 text-left active:scale-[0.97] transition-transform"
-                >
-                  <div
-                    className="w-11 h-11 rounded-[14px] flex items-center justify-center text-xl mb-2.5 border"
-                    style={{ background: svc.bg, borderColor: svc.border }}
-                  >
-                    {svc.emoji}
-                  </div>
-                  <div className="font-heading font-bold text-[13px] leading-tight">{svc.name}</div>
-                  <div className="text-[10px] text-t2 mt-0.5">{svc.desc}</div>
-                  <div className="font-heading font-bold text-primary text-[11px] mt-1.5">{svc.price}</div>
-                </button>
-              ))}
+            <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-xl">
+              {cat.emoji}
             </div>
-          </div>
+            <span className="text-xs text-t3 text-center leading-tight">{cat.label}</span>
+          </button>
         ))}
       </div>
+
+      {myRequests.length > 0 && (
+        <div>
+          <h2 className="font-semibold text-sm mb-3">My Requests</h2>
+          <div className="space-y-3">
+            {myRequests.map((req) => (
+              <Link
+                key={req.id}
+                href={`/services/${req.id}`}
+                className="block bg-white rounded-2xl border border-gray-100 p-4 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getCategoryEmoji(req.category)}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-sm truncate">{req.title}</h3>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ml-2 ${
+                        req.status === "completed" ? "bg-green-100 text-green-700" :
+                        req.status === "cancelled" ? "bg-red-100 text-red-700" :
+                        req.status === "accepted" ? "bg-blue-100 text-blue-700" :
+                        "bg-amber-100 text-amber-700"
+                      }`}>
+                        {req.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-t3">
+                        {new Date(req.created_at).toLocaleDateString("en-ZA", { day: "numeric", month: "short" })}
+                      </span>
+                      <span className="text-sm font-semibold">Budget: R{(req.budget_max_cents / 100).toFixed(0)}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
